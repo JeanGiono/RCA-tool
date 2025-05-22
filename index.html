@@ -249,7 +249,7 @@
         .modal { z-index: 50; } .modal-content { position: relative; } 
         .modal-close-button { position: absolute; top: 0.75rem; right: 0.75rem; background: none; border: none; font-size: 1.5rem; color: #6b7280; cursor: pointer; line-height: 1; }
         .modal-close-button:hover { color: #1f2937; }
-        .modal-options-container { max-height: 60vh; overflow-y: auto; } /* Added for scrollability in parameter modal */
+        .modal-options-container { max-height: 60vh; overflow-y: auto; } 
         .modal-options-container label { cursor: pointer; display: block; margin-bottom: 0.25rem; }
         .modal-options-container h4 { font-weight:600; margin-top: 0.75rem; margin-bottom: 0.25rem; color: #374151; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.25rem; }
         .modal-options-container h4:first-child { margin-top: 0; }
@@ -649,9 +649,7 @@
         let currentZoom = 1.0;
         let historyStack = [];
         let historyIndex = -1; 
-        let longPressTimer = null;
-        let touchStartX = 0;
-        let touchStartY = 0;
+        // Removed: longPressTimer, touchStartX, touchStartY, LONG_PRESS_DURATION, MAX_TOUCH_MOVE_THRESHOLD
         let currentAbcCauseTargetNodeId = null; 
         let currentAbcCauseFilter = 'all'; 
         let currentAbcSolutionFilter = 'all';
@@ -663,8 +661,6 @@
         const MIN_ZOOM = 0.2;
         const MAX_ZOOM = 3.0;
         const MAX_HISTORY_STATES = 50; 
-        const LONG_PRESS_DURATION = 700; 
-        const MAX_TOUCH_MOVE_THRESHOLD = 10; 
         const QUADRANT_COLORS = {
             Q1: 'rgba(220, 252, 231, 0.4)', 
             Q2: 'rgba(219, 234, 254, 0.4)', 
@@ -717,8 +713,7 @@
 
         const BUSINESS_CONTRADICTION_MATRIX = {
             "活動效用性": {
-                "活動效用性": [], // X
-                "活動可變性": [26,3,40,2], "活動費用": [18,35,28,26], "活動時間": [39,8,39,36], "活動複雜性": [33,18,17,7],
+                "活動效用性": [], "活動可變性": [26,3,40,2], "活動費用": [18,35,28,26], "活動時間": [39,8,39,36], "活動複雜性": [33,18,17,7],
                 "活動方便性": [21,12,20,35], "活動安全性": [38,35,1,27], "活動可靠性": [39,40,9,2], "系統可變性": [36,18,40,9],
                 "系統費用": [18,37,20,35], "系統時間": [21,13,27,2], "系統複雜性": [33,6,24,20], "系統方便性": [17,7,5,13],
                 "系統安全性": [19,39,30,4], "系統可靠性": [21,12,18,9], "內部風險": [20,35,28,26], "外部風險": [10,12,37,11],
@@ -729,7 +724,7 @@
             },
             "活動可變性": {
                 "活動效用性": [3,35,40,2], "活動可變性": [], "活動費用": [7,39,33,22], "活動時間": [21,39,24,22],
-                "活動複雜性": [9,27,26,9], "活動方便性": [21,25,38,33], "活動可靠性": [12,5,31,33], "系統可變性": [6,30,24,19],
+                "活動複雜性": [9,27,26,9], "活動方便性": [21,25,38,33], "活動安全性": [], "活動可靠性": [12,5,31,33], "系統可變性": [6,30,24,19],
                 "系統費用": [24,19,28,1], "系統時間": [2,15,28,14], "系統複雜性": [2,15,14,30], "系統方便性": [2,8],
                 "系統安全性": [1,23,1,7], "系統可靠性": [8,28,31], "內部風險": [25,16,25,23], "外部風險": [30,28,32,25],
                 "信息共享": [16,10,2,8], "信息損失": [29,34,40,30], "信息流": [1,39,27,16], "回饋": [26,4,16,39],
@@ -737,9 +732,16 @@
                 "適應性/多功能性": [16,29,35,5], "組織壓力": [7,10,7,10], "組織穩定性": [34,5,34,5], "顧客壓力": [3,12,3,12],
                 "顧客穩定性": [19,33,19,33], "環境穩定性": [32,36,32,36]
             },
-            // ... (Continue populating the entire matrix based on the PDF)
-            // This is a very large task and requires careful transcription.
-            // For now, I'll add a few more example rows to demonstrate structure.
+             "活動費用": {
+                "活動效用性": [18,37,20,35], "活動可變性": [21,39,9,27], "活動費用": [], "活動時間": [39,18,1,2],
+                "活動複雜性": [1,2,24,22], "活動方便性": [35,1,9,31], "活動安全性": [], "活動可靠性": [28,20,8,16],
+                "系統可變性": [3,35,28,20], "系統費用": [], "系統時間": [30,29,19,15], "系統複雜性": [36,24,27,29],
+                "系統方便性": [24,22,8,16], "系統安全性": [], "系統可靠性": [39,40,25,30], "內部風險": [8,16,26,9],
+                "外部風險": [38,33,17,29], "信息共享": [31,33,28,10], "信息損失": [34,1,5,36], "信息流": [37,8,25,23],
+                "回饋": [30,12,22,30], "物料流": [40,35,32,18], "對系統的有害影響": [11,23,38,18], "系統產生的有害影響": [10,8,16,14],
+                "系統有效性": [12,16,39,24], "適應性/多功能性": [5,11,29,33], "組織壓力": [15,38,28,29], "組織穩定性": [23,2,17,40],
+                "顧客壓力": [18,23,16,40], "顧客穩定性": [24,3,14,26], "環境穩定性": [4,21,33,37]
+            },
             "系統有效性": {
                 "活動效用性": [15,38,39,22], "活動可變性": [26,2,2,33], "活動費用": [25,21,38,38], "活動時間": [19,24,24,3],
                 "活動複雜性": [39,22,6,28], "活動方便性": [2,33,16,17], "活動安全性": [38,28,28,8], "活動可靠性": [6,28,38,6],
@@ -750,7 +752,7 @@
                 "系統有效性": [], "適應性/多功能性": [16,26,16,26], "組織壓力": [40,27,40,27], "組織穩定性": [11,39,11,39],
                 "顧客壓力": [15,36,15,36], "顧客穩定性": [16,22,16,22], "環境穩定性": [14,4,14,4]
             },
-             "環境穩定性": { // Example for the last row in PDF
+             "環境穩定性": { 
                 "活動效用性": [20,33,26,27], "活動可變性": [36,10,35,17], "活動費用": [27,35,10,19], "活動時間": [24,36,13,29],
                 "活動複雜性": [40,30,37,36], "活動方便性": [28,17,38,31], "活動安全性": [35,17,36,30], "活動可靠性": [10,19,33,40],
                 "系統可變性": [13,29,39,33], "系統費用": [37,36,35,8], "系統時間": [38,31,26,27], "系統複雜性": [36,30,6,34],
@@ -800,6 +802,10 @@
                 solutionTableSection: document.getElementById('solution-table-section'),
                 solutionTableBody: document.getElementById('solution-table-body'),
                 andSourceModal: document.getElementById('and-source-modal'),
+                andSourceModalNodeText: document.getElementById('and-source-modal-node-text'), 
+                andSourceOptionsContainer: document.getElementById('and-source-options-container'), 
+                cancelAndSourcesButton: document.getElementById('cancel-and-sources-button'), 
+                saveAndSourcesButton: document.getElementById('save-and-sources-button'),     
                 effectParameterModal: document.getElementById('effect-parameter-modal'),
                 abcCategoryModal: document.getElementById('abc-category-modal'),
                 abcCauseFilterControls: document.getElementById('abc-cause-filter-controls'),
@@ -849,7 +855,6 @@
                 idealityWeightsSumWarning: document.getElementById('ideality-weights-sum-warning'),
                 saveIdealityAssessmentButton: document.getElementById('save-ideality-assessment-button'),
                 cancelIdealityAssessmentButton: document.getElementById('cancel-ideality-assessment-button'),
-                // Effect Parameter Modal elements
                 effectParameterModalNodeText: document.getElementById('effect-parameter-modal-node-text'),
                 effectParameterOptionsContainer: document.getElementById('effect-parameter-options-container'),
                 cancelEffectParametersButton: document.getElementById('cancel-effect-parameters-button'),
@@ -912,12 +917,9 @@
             domElements.toggleIdeasLandscapeButton.addEventListener('click', handleToggleIdeasLandscape);
             domElements.updateIdeasLandscapeChartButton.addEventListener('click', renderIdeasLandscapeChart);
             
-            const andSourceModalSaveButton = domElements.andSourceModal?.querySelector('#save-and-sources-button');
-            const andSourceModalCancelButton = domElements.andSourceModal?.querySelector('#cancel-and-sources-button');
-            if (andSourceModalSaveButton) andSourceModalSaveButton.addEventListener('click', handleSaveAndSources);
-            if (andSourceModalCancelButton) andSourceModalCancelButton.addEventListener('click', () => { domElements.andSourceModal.style.display = 'none'; currentAndTargetNodeId = null; });
+            if (domElements.saveAndSourcesButton) domElements.saveAndSourcesButton.addEventListener('click', handleSaveAndSources);
+            if (domElements.cancelAndSourcesButton) domElements.cancelAndSourcesButton.addEventListener('click', () => { domElements.andSourceModal.style.display = 'none'; currentAndTargetNodeId = null; });
             
-            // Effect Parameter Modal Listeners
             if (domElements.saveEffectParametersButton) domElements.saveEffectParametersButton.addEventListener('click', handleSaveEffectParameters);
             if (domElements.cancelEffectParametersButton) domElements.cancelEffectParametersButton.addEventListener('click', () => { domElements.effectParameterModal.style.display = 'none'; currentParameterTargetNodeId = null; });
             
@@ -956,10 +958,7 @@
             });
             
             domElements.scalableContentWrapper.addEventListener('contextmenu', handleDiagramContextMenu);
-            domElements.scalableContentWrapper.addEventListener('touchstart', handleDiagramTouchStart, { passive: false });
-            domElements.scalableContentWrapper.addEventListener('touchmove', handleDiagramTouchMove, { passive: true });
-            domElements.scalableContentWrapper.addEventListener('touchend', handleDiagramTouchEnd);
-            domElements.scalableContentWrapper.addEventListener('touchcancel', handleDiagramTouchEnd); 
+            // Removed touch event listeners for long-press download
         }
 
         function initializeIdealityAssessmentRangeListeners() {
@@ -1007,11 +1006,13 @@
         }
 
         // --- Diagram Interaction and Zoom ---
-        function handleDiagramContextMenu(event) { event.preventDefault(); if (rcaData) { exportDiagramAsPNG(); } }
-        function triggerDownloadForLongPress() { if (rcaData) { exportDiagramAsPNG(); } }
-        function handleDiagramTouchStart(event) { if (event.touches.length === 1) { touchStartX = event.touches[0].clientX; touchStartY = event.touches[0].clientY; clearTimeout(longPressTimer); longPressTimer = setTimeout(() => { const touch = event.touches[0] || event.changedTouches[0]; if (touch) { const deltaX = Math.abs(touch.clientX - touchStartX); const deltaY = Math.abs(touch.clientY - touchStartY); if (deltaX <= MAX_TOUCH_MOVE_THRESHOLD && deltaY <= MAX_TOUCH_MOVE_THRESHOLD) { triggerDownloadForLongPress(); } } else { clearTimeout(longPressTimer); } }, LONG_PRESS_DURATION); } else { clearTimeout(longPressTimer); } }
-        function handleDiagramTouchMove(event) { if (longPressTimer && event.touches.length === 1) { const deltaX = Math.abs(event.touches[0].clientX - touchStartX); const deltaY = Math.abs(event.touches[0].clientY - touchStartY); if (deltaX > MAX_TOUCH_MOVE_THRESHOLD || deltaY > MAX_TOUCH_MOVE_THRESHOLD) { clearTimeout(longPressTimer); longPressTimer = null; } } }
-        function handleDiagramTouchEnd() { clearTimeout(longPressTimer); longPressTimer = null; }
+        function handleDiagramContextMenu(event) { 
+            event.preventDefault(); 
+            if (rcaData) { 
+                exportDiagramAsPNG(); 
+            } 
+        }
+        // Removed: triggerDownloadForLongPress, handleDiagramTouchStart, handleDiagramTouchMove, handleDiagramTouchEnd
         
         function applyZoom(newZoomLevel, avoidRedraw = false) { currentZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newZoomLevel)); domElements.scalableContentWrapper.style.transform = `scale(${currentZoom})`; domElements.zoomLevelDisplay.textContent = `${Math.round(currentZoom * 100)}%`; if (!avoidRedraw && rcaData) { requestAnimationFrame(() => drawAllSvgConnectors()); } updateButtonStates(); }
         
@@ -1089,6 +1090,8 @@
                 if (rcaData) {
                     function migrateNodeDataRecursive(node) {
                         if (!node) return;
+                        if (typeof node.andSourceNodeIds === 'undefined') node.andSourceNodeIds = [];
+                        if (typeof node.effectParameters === 'undefined') node.effectParameters = [];
                         
                         if (node.type === 'cause') {
                             if (typeof node.improvingParameter === 'undefined') node.improvingParameter = null;
@@ -1259,7 +1262,7 @@
                 parentId: parentId, 
                 children: [], 
                 andSourceNodeIds: [], 
-                effectParameters: [], 
+                effectParameters: [],  
                 improvingParameter: null,
                 worseningParameter: null,
                 solutionsGenerated: [], 
@@ -1427,24 +1430,27 @@
             if (isFinalizedView) return;
             currentAndTargetNodeId = targetNodeId;
             const targetNode = findNodeById(rcaData, targetNodeId);
-            if (!targetNode) return;
+            if (!targetNode || (targetNode.type !== 'positive-effect' && targetNode.type !== 'negative-effect')) {
+                 alert('只能為「效果」節點設定 AND 輸入源。');
+                return;
+            }
 
             domElements.andSourceModalNodeText.textContent = `為效果「${targetNode.text.substring(0,30)}...」設定 AND 輸入源:`;
-            const optionsContainer = domElements.andSourceModal.querySelector('#and-source-options-container');
-            optionsContainer.innerHTML = ''; // Clear previous options
+            const optionsContainer = domElements.andSourceOptionsContainer;
+            optionsContainer.innerHTML = ''; 
 
             const potentialSources = [];
-            function collectPotentialSources(node) {
-                if (!node || node.id === targetNodeId) return; // Cannot be its own source
-                if (node.type === 'cause' || node.type === 'initial-problem') { // Only causes or initial problem can be sources
+            function collectPotentialSourcesRecursive(node) {
+                if (!node) return;
+                if (node.id !== targetNodeId && (node.type === 'cause' || node.type === 'initial-problem')) {
                     potentialSources.push({ id: node.id, text: node.text });
                 }
-                if (node.children) node.children.forEach(collectPotentialSources);
+                if (node.children) node.children.forEach(collectPotentialSourcesRecursive);
             }
-            collectPotentialSources(rcaData);
+            collectPotentialSourcesRecursive(rcaData);
 
             if (potentialSources.length === 0) {
-                optionsContainer.innerHTML = '<p class="text-sm text-gray-500">沒有可用的 AND 輸入源節點。</p>';
+                optionsContainer.innerHTML = '<p class="text-sm text-gray-500">沒有可用的 AND 輸入源節點 (原因或主要問題)。</p>';
             } else {
                 potentialSources.forEach(source => {
                     const label = document.createElement('label');
@@ -1452,6 +1458,7 @@
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
                     checkbox.value = source.id;
+                    checkbox.name = 'andSourceOption';
                     checkbox.className = 'mr-2 rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50';
                     if (targetNode.andSourceNodeIds && targetNode.andSourceNodeIds.includes(source.id)) {
                         checkbox.checked = true;
@@ -1470,13 +1477,13 @@
             if (!targetNode) return;
 
             const selectedSources = [];
-            domElements.andSourceModal.querySelectorAll('#and-source-options-container input[type="checkbox"]:checked').forEach(checkbox => {
+            domElements.andSourceOptionsContainer.querySelectorAll('input[name="andSourceOption"]:checked').forEach(checkbox => {
                 selectedSources.push(checkbox.value);
             });
 
             targetNode.andSourceNodeIds = selectedSources;
             pushStateToHistory(rcaData);
-            renderRcaDiagram(); // Re-render to show AND connectors if any
+            renderRcaDiagram(); 
             domElements.andSourceModal.style.display = 'none';
             currentAndTargetNodeId = null;
         }
@@ -1492,7 +1499,7 @@
 
             domElements.effectParameterModalNodeText.textContent = `為效果「${targetNode.text.substring(0,30)}...」設定參數:`;
             const optionsContainer = domElements.effectParameterOptionsContainer;
-            optionsContainer.innerHTML = ''; // Clear previous options
+            optionsContainer.innerHTML = ''; 
 
             Object.entries(EFFECT_PARAMETERS).forEach(([category, params]) => {
                 const categoryTitle = document.createElement('h4');
@@ -1501,10 +1508,12 @@
 
                 params.forEach(param => {
                     const label = document.createElement('label');
+                    label.className = 'block text-sm text-gray-700 mb-1 items-center'; 
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
                     checkbox.value = param;
-                    checkbox.className = 'mr-2 rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50';
+                    checkbox.name = 'effectParamOption'; 
+                    checkbox.className = 'mr-2 rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 align-middle';
                     if (targetNode.effectParameters && targetNode.effectParameters.includes(param)) {
                         checkbox.checked = true;
                     }
@@ -1522,14 +1531,14 @@
             if (!targetNode) return;
 
             const selectedParams = [];
-            domElements.effectParameterOptionsContainer.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
+            domElements.effectParameterOptionsContainer.querySelectorAll('input[name="effectParamOption"]:checked').forEach(checkbox => {
                 selectedParams.push(checkbox.value);
             });
 
             targetNode.effectParameters = selectedParams;
             pushStateToHistory(rcaData);
             renderRcaDiagram(); 
-            renderCauseEffectTable(); // Effect parameters might be relevant here in future
+            renderCauseEffectTable(); 
             domElements.effectParameterModal.style.display = 'none';
             currentParameterTargetNodeId = null;
         }
@@ -1629,13 +1638,12 @@
             domElements.suggestedPrinciplesList.innerHTML = ''; 
 
             if (improvingParam && worseningParam && improvingParam !== "未選擇" && worseningParam !== "未選擇") {
-                // Accessing the matrix: BUSINESS_CONTRADICTION_MATRIX[ImprovingParameterName][WorseningParameterName]
                 const principlesArray = BUSINESS_CONTRADICTION_MATRIX[improvingParam]?.[worseningParam];
                 
                 if (principlesArray && principlesArray.length > 0) {
                     domElements.suggestedPrinciplesContainer.style.display = 'block';
                     principlesArray.forEach(num => {
-                        const principleName = INVENTIVE_PRINCIPLES[num - 1]; // Principles are 1-indexed
+                        const principleName = INVENTIVE_PRINCIPLES[num - 1]; 
                         if (principleName) {
                             const li = document.createElement('li');
                             li.textContent = `${num}. ${principleName}`;
@@ -1831,7 +1839,7 @@
                     if(mergePoint_svg.y < 0) mergePoint_svg.y = 10; 
                     _drawSvgCircle(targetSvgLayer, mergePoint_svg.x, mergePoint_svg.y, 6, '#6d28d9', zoom); 
                     parentNodeData.andSourceNodeIds.forEach(sourceId => { 
-                        const sourceElement = currentContainer.querySelector(`#${sourceId}`); 
+                        const sourceElement = domElements.diagramContainer.querySelector(`#${sourceId}`); 
                         if (sourceElement) { 
                             const sourceRect = sourceElement.getBoundingClientRect(); 
                             const sourceConnX_svg = (sourceRect.left - (scalableWrapperRect.left + wrapperPaddingLeft) + sourceRect.width / 2) / zoom; 
