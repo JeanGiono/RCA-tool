@@ -183,6 +183,7 @@
         .engineering-param-display { font-size: 0.7rem; color: #4b5563; margin-top: 0.25rem; }
         .ideality-score-display { font-size: 0.7rem; color: #1d4ed8; margin-top: 0.25rem; font-weight: bold;}
 
+
         .rca-node-initial-problem { background-color: #fee2e2; border-color: #ef4444; }
         .rca-node-initial-problem .rca-node-icon { background-color: #ef4444; }
         .rca-node-cause { background-color: #fef9c3; border-color: #f59e0b; }
@@ -300,6 +301,31 @@
         .ideality-criterion input[type="number"], .ideality-criterion select { width: 100%; }
         .ideality-criterion input[type="range"] { width: calc(100% - 3.5rem); margin-right: 0.5rem; vertical-align: middle;}
         .ideality-criterion .range-value { font-size: 0.8rem; display: inline-block; width: 2.5rem; text-align: right;}
+
+        /* Suggested Principles in TRIZ Modal */
+        #suggested-principles-container {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background-color: #f3f4f6; /* Tailwind gray-100 */
+            border-radius: 0.375rem;
+            border: 1px solid #e5e7eb; /* Tailwind gray-200 */
+        }
+        #suggested-principles-container h5 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #374151; /* Tailwind gray-700 */
+            margin-bottom: 0.5rem;
+        }
+        #suggested-principles-list {
+            list-style-type: decimal;
+            margin-left: 1.25rem;
+            font-size: 0.85rem;
+            color: #4b5563; /* Tailwind gray-600 */
+        }
+        #suggested-principles-list li {
+            margin-bottom: 0.25rem;
+        }
+
 
     </style>
 </head>
@@ -448,6 +474,7 @@
             </div>
         </section>
 
+
         <div id="abc-category-modal" class="modal fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center" style="display: none;">
             </div>
 
@@ -467,6 +494,11 @@
                             <label for="worsening-parameter-select" class="block text-sm font-medium text-gray-700">惡化時特性參數:</label>
                             <select id="worsening-parameter-select" class="select-field mt-1"></select>
                         </div>
+                    </div>
+                    
+                    <div id="suggested-principles-container" style="display: none;">
+                        <h5>建議發明原理 (根據矛盾矩陣):</h5>
+                        <ul id="suggested-principles-list"></ul>
                     </div>
 
                     <h4 class="text-md font-semibold text-gray-800 mt-4 mb-2">解決方案列表:</h4>
@@ -573,6 +605,7 @@
             </div>
         </div>
 
+
         <div id="and-source-modal" class="modal fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center" style="display: none;">
             </div>
         <div id="effect-parameter-modal" class="modal fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center" style="display: none;">
@@ -608,10 +641,10 @@
         const LONG_PRESS_DURATION = 700; 
         const MAX_TOUCH_MOVE_THRESHOLD = 10; 
         const QUADRANT_COLORS = {
-            Q1: 'rgba(220, 252, 231, 0.4)', // Green-ish (Long time, High score - Long-term plan) - Slightly more opaque
-            Q2: 'rgba(219, 234, 254, 0.4)', // Blue-ish (Short time, High score - Priority)
-            Q3: 'rgba(254, 226, 226, 0.4)', // Red-ish (Short time, Low score - Not worth)
-            Q4: 'rgba(254, 249, 195, 0.4)', // Yellow-ish (Long time, Low score - Don't execute) - Adjusted Q4 color for better distinction
+            Q1: 'rgba(220, 252, 231, 0.4)', 
+            Q2: 'rgba(219, 234, 254, 0.4)', 
+            Q3: 'rgba(254, 226, 226, 0.4)', 
+            Q4: 'rgba(254, 249, 195, 0.4)', 
         };
         const QUADRANT_LABELS = {
             Q1: '長期規劃 (Q1)',
@@ -638,7 +671,7 @@
             'none': 'rgba(75, 85, 99, 1)'
         };
 
-        let domElements = {}; // Will be populated by initializeDomElements
+        let domElements = {}; 
 
         const EFFECT_PARAMETERS = {
             "活動": ["活動效用性", "活動可變性", "活動費用", "活動時間", "活動複雜性", "活動方便性", "活動安全性", "活動可靠性"],
@@ -648,19 +681,81 @@
         
         const INVENTIVE_PRINCIPLES = ["分割", "取出/分離", "改變局部特性", "非對稱性", "合併/整合", "多用性/多功能", "套疊/巢狀結構", "反制行動", "預先反制行動", "預先行動", "事先補償/預防", "消除緊張", "另一方向/反向操作", "非直線姓", "動態化", "稍微少些或多些(的動作)", "另外維度/空間", "共鳴(協調)", "週期行動", "連續的有利作用", "快速行動", "轉有害為有利", "回饋", "中介物/媒介", "自助/自我服務", "使用複製品或模型", "廉價與短期[拋棄式]", "替換系統運作原理/使用其他原理", "流動性和靈活性", "改變邊界條件", "孔洞和網路", "改變外觀/可見度", "同質性", "丟棄與恢復", "改變特性", "模範轉移", "相對變化", "增強的環境", "鈍性(惰性)環境", "組合(複合)結構"];
 
-        const TRIZ_ENGINEERING_PARAMETERS = [
-            "未選擇", "重量(動態)", "重量(靜態)", "長度(動態)", "長度(靜態)", "面積(動態)", "面積(靜態)", "體積(動態)", "體積(靜態)", 
-            "速度", "力量", "應力/壓力", "形狀", "穩定性", "強度", "作用時間(動態)", "作用時間(靜態)", "溫度", "亮度",
-            "能量消耗(動態)", "能量消耗(靜態)", "功率", "能量損失", "物質損失", "資訊損失", "時間損失", "物質數量", "可靠性",
-            "量測精度", "製造精度", "有害作用(外部)", "有害作用(自身)", "製造容易度", "使用容易度", "維修容易度", 
-            "適應性/通用性", "複雜性", "控制/量測難度", "自動化程度", "生產力/效率"
+        // Business Management Parameters (from PDF, using row headers for "改善參數" as definitive list)
+        const BUSINESS_MANAGEMENT_PARAMETERS = [
+            "未選擇", // Added for default option
+            "活動效用性",
+            "活動可變性",
+            "活動費用",
+            "活動時間",
+            "活動複雜性",
+            "活動方便性",
+            "活動安全性",
+            "活動可靠性",
+            "系統可變性", // Row #9 in PDF
+            "系統費用",   // Row #10 in PDF
+            "系統時間",
+            "系統複雜性",
+            "系統方便性",
+            "系統安全性",
+            "系統可靠性",
+            "內部風險",   // Row #16 in PDF
+            "外部風險",
+            "信息共享",
+            "信息損失",
+            "信息流",
+            "回饋",
+            "物料流",
+            "對系統的有害影響", // Row #23 in PDF
+            "系統產生的有害影響", // Row #24 in PDF
+            "系統有效性",       // Row #25 in PDF
+            "適應性/多功能性",
+            "組織壓力",
+            "組織穩定性",
+            "顧客壓力",
+            "顧客穩定性",
+            "環境穩定性"
         ];
+
+        // Business Management Contradiction Matrix
+        // IMPORTANT: This matrix needs to be fully populated based on the PDF provided.
+        // The structure is: BUSINESS_CONTRADICTION_MATRIX[ImprovingParameterName][WorseningParameterName] = [principleNumbersArray];
+        const BUSINESS_CONTRADICTION_MATRIX = {
+            "活動效用性": {
+                "活動可變性": [26, 3, 40, 2],
+                "活動費用": [18, 35, 28, 26],
+                "活動時間": [39, 8, 39, 36], // Data from PDF for (Imp:1, Wor:4)
+                "活動複雜性": [33, 18, 17, 7], // Data from PDF for (Imp:1, Wor:5)
+                // ... Add all 31 worsening parameters for "活動效用性"
+            },
+            "活動可變性": {
+                "活動效用性": [3, 35, 40, 2], // Data from PDF for (Imp:2, Wor:1)
+                "活動費用": [7, 39, 33, 22],   // Data from PDF for (Imp:2, Wor:3)
+                // ... Add all 31 worsening parameters for "活動可變性"
+            },
+            "活動費用": {
+                "活動效用性": [18, 37, 20, 35], // Data from PDF for (Imp:3, Wor:1)
+                "活動可變性": [21, 39, 9, 27],   // Data from PDF for (Imp:3, Wor:2)
+                // ... Add all 31 worsening parameters for "活動費用"
+            },
+            // ... Add all 31 improving parameters and their corresponding worsening parameter entries
+            // Placeholder for the rest of the matrix.
+            // Example:
+            // "環境穩定性": {
+            //     "活動效用性": [20, 33, 26, 27], // Example data, replace with actual PDF data
+            //     "顧客壓力": [35, 8, 40, 30]   // Example data
+            // }
+        };
+        // Function to parse principle strings like "26,3,40,2" into an array of numbers
+        function parsePrinciples(principlesString) {
+            if (!principlesString || typeof principlesString !== 'string') return [];
+            return principlesString.split(',').map(numStr => parseInt(numStr.trim())).filter(num => !isNaN(num));
+        }
 
         // --- Initialization ---
         function initializeDomElements() {
             domElements = {
-                // Main page elements
-                mainToolTitle: document.getElementById('main-tool-title'), // For tool name update
+                mainToolTitle: document.getElementById('main-tool-title'), 
                 problemInput: document.getElementById('problem-statement-input'),
                 setProblemButton: document.getElementById('set-problem-button'),
                 diagramRenderArea: document.getElementById('diagram-render-area'),
@@ -670,7 +765,6 @@
                 diagramTitle: document.getElementById('diagram-title'),
                 problemInputArea: document.getElementById('problem-input-area'),
                 toolButtonsContainer: document.getElementById('tool-buttons'),
-                // File menu
                 fileMenuButton: document.getElementById('file-menu-button'),
                 fileDropdownContent: document.getElementById('file-dropdown-content'),
                 saveDiagramButton: document.getElementById('save-diagram-button'),
@@ -678,41 +772,34 @@
                 saveToFileButton: document.getElementById('save-to-file-button'),
                 loadFromFileLabel: document.getElementById('load-from-file-label'),
                 fileInputForLoad: document.getElementById('file-input-for-load'),
-                // Undo/Redo
                 undoButton: document.getElementById('undo-button'),
                 redoButton: document.getElementById('redo-button'),
-                // Zoom controls
                 zoomOutButton: document.getElementById('zoom-out-button'),
                 zoomInButton: document.getElementById('zoom-in-button'),
                 resetZoomButton: document.getElementById('reset-zoom-button'),
                 zoomLevelDisplay: document.getElementById('zoom-level-display'),
-                // Diagram actions
                 finalizeDiagramButton: document.getElementById('finalize-diagram-button'),
                 autoAdjustLayoutButton: document.getElementById('auto-adjust-layout-button'),
-                // Export menu
                 exportMenuButton: document.getElementById('export-menu-button'),
                 exportDropdownContent: document.getElementById('export-dropdown-content'),
                 exportPngButton: document.getElementById('export-png-button'),
-                // Table toggles
                 toggleCauseEffectTableButton: document.getElementById('toggle-cause-effect-table-button'),
                 toggleSolutionTableButton: document.getElementById('toggle-solution-table-button'),
-                // Table sections and bodies
                 causeEffectTableSection: document.getElementById('cause-effect-table-section'),
                 causeEffectTableBody: document.getElementById('cause-effect-table-body'),
                 solutionTableSection: document.getElementById('solution-table-section'),
                 solutionTableBody: document.getElementById('solution-table-body'),
-                // Modals (general)
                 andSourceModal: document.getElementById('and-source-modal'),
                 effectParameterModal: document.getElementById('effect-parameter-modal'),
                 abcCategoryModal: document.getElementById('abc-category-modal'),
-                // Filters
                 abcCauseFilterControls: document.getElementById('abc-cause-filter-controls'),
                 abcSolutionFilterControls: document.getElementById('abc-solution-filter-controls'),
-                // TRIZ Solution Modal specific elements
                 trizSolutionModal: document.getElementById('triz-solution-modal'),
                 trizModalCauseText: document.getElementById('triz-modal-cause-text'),
                 improvingParameterSelect: document.getElementById('improving-parameter-select'),
                 worseningParameterSelect: document.getElementById('worsening-parameter-select'),
+                suggestedPrinciplesContainer: document.getElementById('suggested-principles-container'), // New
+                suggestedPrinciplesList: document.getElementById('suggested-principles-list'),       // New
                 solutionsListContainer: document.getElementById('solutions-list-container'),
                 addNewSolutionEntryButton: document.getElementById('add-new-solution-entry-button'),
                 editSolutionEntryContainer: document.getElementById('edit-solution-entry-container'),
@@ -725,7 +812,6 @@
                 saveSolutionEntryButton: document.getElementById('save-solution-entry-button'),
                 cancelEditSolutionButton: document.getElementById('cancel-edit-solution-button'),
                 editSolutionTitle: document.getElementById('edit-solution-title'),
-                // Ideas Landscape elements
                 toggleIdeasLandscapeButton: document.getElementById('toggle-ideas-landscape-button'),
                 ideasLandscapeSection: document.getElementById('ideas-landscape-section'),
                 ideasLandscapeChartCanvas: document.getElementById('ideas-landscape-chart'),
@@ -733,7 +819,6 @@
                 updateIdeasLandscapeChartButton: document.getElementById('update-ideas-landscape-chart-button'),
                 landscapeTimeThresholdInput: document.getElementById('landscape-time-threshold'),
                 landscapeScoreThresholdInput: document.getElementById('landscape-score-threshold'),
-                // Ideality Assessment Modal specific elements
                 idealityAssessmentModal: document.getElementById('ideality-assessment-modal'),
                 idealityModalSolutionText: document.getElementById('ideality-modal-solution-text'),
                 assessingSolutionCauseIdInput: document.getElementById('assessing-solution-cause-id'),
@@ -758,10 +843,7 @@
         }
 
         function initialize() {
-            initializeDomElements(); // Get all DOM elements first
-            // document.title = "創新問題解決工具"; // Set document title
-            // domElements.mainToolTitle.textContent = "創新問題解決工具"; // Set main header title
-
+            initializeDomElements(); 
             populateSelects();
             setupEventListeners();
             new ResizeObserver(() => drawAllSvgConnectors()).observe(domElements.scalableContentWrapper); 
@@ -771,9 +853,10 @@
         }
 
         function populateSelects() {
-            populateSelect(domElements.improvingParameterSelect, TRIZ_ENGINEERING_PARAMETERS);
-            populateSelect(domElements.worseningParameterSelect, TRIZ_ENGINEERING_PARAMETERS);
-            populateSelect(domElements.solutionPrincipleSelect, INVENTIVE_PRINCIPLES, false); 
+            // Use BUSINESS_MANAGEMENT_PARAMETERS for TRIZ conflict parameters
+            populateSelect(domElements.improvingParameterSelect, BUSINESS_MANAGEMENT_PARAMETERS, true); // true to include "未選擇"
+            populateSelect(domElements.worseningParameterSelect, BUSINESS_MANAGEMENT_PARAMETERS, true); // true to include "未選擇"
+            populateSelect(domElements.solutionPrincipleSelect, INVENTIVE_PRINCIPLES, false); // false, principles don't need "未選擇"
         }
 
         function setupEventListeners() {
@@ -815,7 +898,6 @@
             domElements.toggleIdeasLandscapeButton.addEventListener('click', handleToggleIdeasLandscape);
             domElements.updateIdeasLandscapeChartButton.addEventListener('click', renderIdeasLandscapeChart);
             
-            // Modal listeners (ensure modals exist before adding listeners if they are dynamically created)
             const andSourceModalSaveButton = domElements.andSourceModal?.querySelector('#save-and-sources-button');
             const andSourceModalCancelButton = domElements.andSourceModal?.querySelector('#cancel-and-sources-button');
             if (andSourceModalSaveButton) andSourceModalSaveButton.addEventListener('click', handleSaveAndSources);
@@ -838,9 +920,9 @@
             });
 
             // TRIZ Solution Modal Listeners
-            document.getElementById('close-triz-modal-button').addEventListener('click', closeTrizSolutionModal); // Assuming this button always exists
-            domElements.improvingParameterSelect.addEventListener('change', handleSaveTrizParameters);
-            domElements.worseningParameterSelect.addEventListener('change', handleSaveTrizParameters);
+            document.getElementById('close-triz-modal-button').addEventListener('click', closeTrizSolutionModal); 
+            domElements.improvingParameterSelect.addEventListener('change', handleSaveTrizParameters); // Also triggers suggested principles update
+            domElements.worseningParameterSelect.addEventListener('change', handleSaveTrizParameters); // Also triggers suggested principles update
             domElements.addNewSolutionEntryButton.addEventListener('click', () => showEditSolutionEntry(null));
             domElements.saveSolutionEntryButton.addEventListener('click', handleSaveSolutionEntry);
             domElements.cancelEditSolutionButton.addEventListener('click', () => {
@@ -848,7 +930,6 @@
                 domElements.editingSolutionIdInput.value = '';
             });
 
-            // Ideality Assessment Modal Listeners
             initializeIdealityAssessmentRangeListeners();
             domElements.saveIdealityAssessmentButton.addEventListener('click', handleSaveIdealityAssessment);
             domElements.cancelIdealityAssessmentButton.addEventListener('click', closeIdealityAssessmentModal);
@@ -892,6 +973,7 @@
             });
         }
 
+
         // --- Utility Functions ---
         function populateSelect(selectElement, optionsArray, includeDefault = true) {
             if (!selectElement) return;
@@ -899,11 +981,13 @@
             if (includeDefault) {
                 const defaultOption = document.createElement('option');
                 defaultOption.value = "";
-                defaultOption.textContent = "未選擇";
+                defaultOption.textContent = "未選擇"; // Default "Not Selected" text
                 selectElement.appendChild(defaultOption);
             }
             optionsArray.forEach(optionText => {
+                // If includeDefault is true, and this option is "未選擇", skip if it's not the first item (to avoid duplicate "未選擇")
                 if (includeDefault && optionText === "未選擇" && optionsArray.indexOf("未選擇") !== 0) return; 
+                
                 const option = document.createElement('option');
                 option.value = optionText;
                 option.textContent = optionText;
@@ -961,7 +1045,6 @@
         
         // --- Data Loading and Saving ---
         function getDefaultIdealityAssessment() {
-            // Provides a default structure for ideality assessment
             return {
                 problemSolved: null, 
                 winWin: null, 
@@ -992,19 +1075,16 @@
                     return false;
                 }
 
-                // Backward compatibility and data structure validation
                 if (rcaData) {
                     function migrateNodeDataRecursive(node) {
                         if (!node) return;
                         
                         if (node.type === 'cause') {
-                            // Initialize fields if they don't exist
                             if (typeof node.improvingParameter === 'undefined') node.improvingParameter = null;
                             if (typeof node.worseningParameter === 'undefined') node.worseningParameter = null;
                             if (typeof node.abcCategory === 'undefined') node.abcCategory = null;
                             if (typeof node.solutionsGenerated === 'undefined') node.solutionsGenerated = [];
 
-                            // Migrate old inventivePrinciples to new solutions structure
                             if (node.inventivePrinciples && Array.isArray(node.inventivePrinciples)) {
                                 node.inventivePrinciples.forEach(oldIp => {
                                     if (!node.solutionsGenerated.some(s => s.principleName === oldIp.name && s.description === oldIp.solution)) {
@@ -1023,14 +1103,12 @@
                                 delete node.inventivePrinciples; 
                             }
 
-                            // Ensure all solutions have the necessary new fields
                             if(node.solutionsGenerated) {
                                 node.solutionsGenerated.forEach(sol => {
                                     if (typeof sol.timeRequired === 'undefined') sol.timeRequired = null;
                                     if (typeof sol.mcdmScore === 'undefined') sol.mcdmScore = null;
                                     if (typeof sol.cost === 'undefined') sol.cost = null;
                                     
-                                    // Ensure idealityAssessment and its weights sub-object exist and have defaults
                                     if (typeof sol.idealityAssessment === 'undefined' || sol.idealityAssessment === null) {
                                         sol.idealityAssessment = getDefaultIdealityAssessment();
                                     } else {
@@ -1038,14 +1116,12 @@
                                         if (typeof sol.idealityAssessment.weights === 'undefined' || sol.idealityAssessment.weights === null) {
                                             sol.idealityAssessment.weights = defaultWeights;
                                         } else {
-                                            // Ensure all individual weight properties exist
                                             for (const key in defaultWeights) {
                                                 if (typeof sol.idealityAssessment.weights[key] === 'undefined' || sol.idealityAssessment.weights[key] === null) {
                                                     sol.idealityAssessment.weights[key] = defaultWeights[key];
                                                 }
                                             }
                                         }
-                                        // Ensure score fields exist
                                         const defaultScores = getDefaultIdealityAssessment();
                                          if (typeof sol.idealityAssessment.problemSolved === 'undefined') sol.idealityAssessment.problemSolved = defaultScores.problemSolved;
                                          if (typeof sol.idealityAssessment.winWin === 'undefined') sol.idealityAssessment.winWin = defaultScores.winWin;
@@ -1423,10 +1499,38 @@
             domElements.improvingParameterSelect.value = causeNode.improvingParameter || "";
             domElements.worseningParameterSelect.value = causeNode.worseningParameter || "";
             
+            updateSuggestedPrinciples(); // Update suggested principles based on selection
             renderSolutionsListForCause(causeNodeId);
             domElements.editSolutionEntryContainer.style.display = 'none'; 
             domElements.trizSolutionModal.style.display = 'flex';
         }
+
+        function updateSuggestedPrinciples() {
+            const improvingParam = domElements.improvingParameterSelect.value;
+            const worseningParam = domElements.worseningParameterSelect.value;
+            domElements.suggestedPrinciplesList.innerHTML = ''; // Clear previous suggestions
+
+            if (improvingParam && worseningParam && improvingParam !== "未選擇" && worseningParam !== "未選擇") {
+                const principlesNumbers = BUSINESS_CONTRADICTION_MATRIX[improvingParam]?.[worseningParam] || [];
+                
+                if (principlesNumbers.length > 0) {
+                    domElements.suggestedPrinciplesContainer.style.display = 'block';
+                    principlesNumbers.forEach(num => {
+                        const principleName = INVENTIVE_PRINCIPLES[num - 1]; // Assuming 1-indexed numbers
+                        if (principleName) {
+                            const li = document.createElement('li');
+                            li.textContent = `${num}. ${principleName}`;
+                            domElements.suggestedPrinciplesList.appendChild(li);
+                        }
+                    });
+                } else {
+                    domElements.suggestedPrinciplesContainer.style.display = 'none';
+                }
+            } else {
+                domElements.suggestedPrinciplesContainer.style.display = 'none';
+            }
+        }
+
 
         function closeTrizSolutionModal() {
             domElements.trizSolutionModal.style.display = 'none';
@@ -1443,6 +1547,9 @@
                 const oldWorsening = causeNode.worseningParameter;
                 causeNode.improvingParameter = domElements.improvingParameterSelect.value === "未選擇" ? null : domElements.improvingParameterSelect.value;
                 causeNode.worseningParameter = domElements.worseningParameterSelect.value === "未選擇" ? null : domElements.worseningParameterSelect.value;
+                
+                updateSuggestedPrinciples(); // Update suggested principles when parameters change
+
                 if (oldImproving !== causeNode.improvingParameter || oldWorsening !== causeNode.worseningParameter) {
                     pushStateToHistory(rcaData);
                     renderSolutionTable(); 
@@ -1517,6 +1624,7 @@
             const mcdmScore = domElements.solutionMcdmScoreInput.value ? parseFloat(domElements.solutionMcdmScoreInput.value) : null;
             const cost = domElements.solutionCostInput.value ? parseFloat(domElements.solutionCostInput.value) : null;
 
+
             if (!principle || principle === "未選擇") { alert("請選擇一個發明原理。"); return; }
             if (!description) { alert("請輸入方案描述。"); return; }
 
@@ -1530,7 +1638,6 @@
                     causeNode.solutionsGenerated[solIndex].timeRequired = timeRequired;
                     causeNode.solutionsGenerated[solIndex].mcdmScore = mcdmScore;
                     causeNode.solutionsGenerated[solIndex].cost = cost;
-                    // Preserve existing ideality assessment if editing, or initialize if missing
                     if (!causeNode.solutionsGenerated[solIndex].idealityAssessment) {
                          causeNode.solutionsGenerated[solIndex].idealityAssessment = getDefaultIdealityAssessment();
                     }
@@ -1551,8 +1658,8 @@
             renderSolutionsListForCause(currentTrizCauseNodeId);
             domElements.editSolutionEntryContainer.style.display = 'none';
             domElements.editingSolutionIdInput.value = '';
-            renderSolutionTable(); // Data changed, update table
-            renderIdeasLandscapeChart(); // Data changed, update chart
+            renderSolutionTable(); 
+            renderIdeasLandscapeChart(); 
         }
 
         function handleRemoveSolutionEntry(solutionId) {
@@ -1562,8 +1669,8 @@
                 causeNode.solutionsGenerated = causeNode.solutionsGenerated.filter(s => s.id !== solutionId);
                 pushStateToHistory(rcaData);
                 renderSolutionsListForCause(currentTrizCauseNodeId);
-                renderSolutionTable(); // Data changed, update table
-                renderIdeasLandscapeChart(); // Data changed, update chart
+                renderSolutionTable(); 
+                renderIdeasLandscapeChart(); 
             }
         }
 
@@ -1770,7 +1877,7 @@
                                 timeRequired: sol.timeRequired,
                                 mcdmScore: sol.mcdmScore,
                                 cost: sol.cost,
-                                idealityAssessment: sol.idealityAssessment || getDefaultIdealityAssessment() // Ensure default structure
+                                idealityAssessment: sol.idealityAssessment || getDefaultIdealityAssessment() 
                             });
                         });
                     }
@@ -1913,6 +2020,7 @@
         };
         Chart.register(quadrantPlugin); 
 
+
         function renderIdeasLandscapeChart() {
             domElements.ideasLandscapeNoDataMessage.style.display = 'none'; 
             if (!rcaData || !domElements.ideasLandscapeChartCanvas) {
@@ -1973,6 +2081,7 @@
             });
         }
 
+
         // --- TRIZ Ideality Assessment Functions ---
         function openIdealityAssessmentModal(causeId, solutionId) {
             const causeNode = findNodeById(rcaData, causeId);
@@ -1986,8 +2095,8 @@
 
             domElements.idealityModalSolutionText.textContent = `評估方案: ${solution.description.substring(0,60)}${solution.description.length > 60 ? '...' : ''}`;
 
-            const assessment = solution.idealityAssessment || getDefaultIdealityAssessment(); // Ensure assessment object exists
-            const weights = assessment.weights || getDefaultIdealityAssessment().weights; // Ensure weights object exists
+            const assessment = solution.idealityAssessment || getDefaultIdealityAssessment(); 
+            const weights = assessment.weights || getDefaultIdealityAssessment().weights; 
 
             domElements.idealityProblemSolvedRange.value = assessment.problemSolved !== null ? assessment.problemSolved : 5;
             domElements.idealityProblemSolvedValue.textContent = domElements.idealityProblemSolvedRange.value;
@@ -2037,13 +2146,14 @@
             
             domElements.idealityTotalScoreDisplay.textContent = totalWeightedScore.toFixed(2);
 
-            if (Math.abs(totalWeightSum - 1.0) > 0.001) { // Check if sum of weights is not 1
+            if (Math.abs(totalWeightSum - 1.0) > 0.001) { 
                 domElements.idealityWeightsSumWarning.textContent = `注意：目前權重總和為 ${totalWeightSum.toFixed(2)}，建議調整至 1。`;
                 domElements.idealityWeightsSumWarning.style.display = 'block';
             } else {
                 domElements.idealityWeightsSumWarning.style.display = 'none';
             }
         }
+
 
         function handleSaveIdealityAssessment() {
             const causeId = domElements.assessingSolutionCauseIdInput.value;
@@ -2077,8 +2187,8 @@
             solution.idealityAssessment.weightedScore = totalWeightedScore;
 
             pushStateToHistory(rcaData);
-            renderSolutionTable(); // Update table with new ideality score
-            renderIdeasLandscapeChart(); // Update chart as ideality score might affect point size/color
+            renderSolutionTable(); 
+            renderIdeasLandscapeChart(); 
             closeIdealityAssessmentModal();
         }
 
@@ -2157,7 +2267,7 @@
                     resolve();
                 }));
             }
-            await new Promise(resolve => setTimeout(resolve, 300)); // Ensure rendering completes
+            await new Promise(resolve => setTimeout(resolve, 300)); 
 
             try {
                 const canvas = await html2canvas(exportContainer, { 
@@ -2173,7 +2283,7 @@
                 });
                 const image = canvas.toDataURL('image/png');
                 const link = document.createElement('a');
-                link.download = '創新問題解決工具-圖表.png'; // Updated download name
+                link.download = '創新問題解決工具-圖表.png'; 
                 link.href = image;
                 link.click();
             } catch (err) {
@@ -2191,7 +2301,6 @@
             }
         }
         
-        // Call initialize on DOMContentLoaded
         document.addEventListener('DOMContentLoaded', initialize);
     </script>
 </body>
