@@ -649,7 +649,6 @@
         let currentZoom = 1.0;
         let historyStack = [];
         let historyIndex = -1; 
-        // Removed: longPressTimer, touchStartX, touchStartY, LONG_PRESS_DURATION, MAX_TOUCH_MOVE_THRESHOLD
         let currentAbcCauseTargetNodeId = null; 
         let currentAbcCauseFilter = 'all'; 
         let currentAbcSolutionFilter = 'all';
@@ -957,8 +956,7 @@
                 }
             });
             
-            domElements.scalableContentWrapper.addEventListener('contextmenu', handleDiagramContextMenu);
-            // Removed touch event listeners for long-press download
+            // Removed contextmenu listener from scalableContentWrapper to prevent accidental downloads
         }
 
         function initializeIdealityAssessmentRangeListeners() {
@@ -1006,13 +1004,15 @@
         }
 
         // --- Diagram Interaction and Zoom ---
-        function handleDiagramContextMenu(event) { 
+        function handleDiagramContextMenu(event) {
+            // This function is now only called if explicitly re-added for specific elements,
+            // not broadly on the diagram wrapper.
+            // For now, it's effectively disabled for the main diagram area.
             event.preventDefault(); 
-            if (rcaData) { 
-                exportDiagramAsPNG(); 
-            } 
+            // if (event.button === 2 && rcaData) { // Check for actual right mouse click
+            //     exportDiagramAsPNG();
+            // }
         }
-        // Removed: triggerDownloadForLongPress, handleDiagramTouchStart, handleDiagramTouchMove, handleDiagramTouchEnd
         
         function applyZoom(newZoomLevel, avoidRedraw = false) { currentZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newZoomLevel)); domElements.scalableContentWrapper.style.transform = `scale(${currentZoom})`; domElements.zoomLevelDisplay.textContent = `${Math.round(currentZoom * 100)}%`; if (!avoidRedraw && rcaData) { requestAnimationFrame(() => drawAllSvgConnectors()); } updateButtonStates(); }
         
