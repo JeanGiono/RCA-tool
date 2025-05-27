@@ -1299,8 +1299,6 @@
                 selectElement.appendChild(defaultOption);
             }
             optionsArray.forEach(optionText => {
-                if (includeDefault && optionText === "未選擇" && optionsArray.indexOf("未選擇") !== 0) return; 
-                
                 const option = document.createElement('option');
                 option.value = optionText;
                 option.textContent = optionText;
@@ -1604,36 +1602,38 @@
                                     if (typeof sol.mcdmScore === 'undefined') sol.mcdmScore = null; 
                                     if (typeof sol.cost === 'undefined') sol.cost = null;
                                     
-                                    if (typeof sol.idealityAssessment === 'undefined' || sol.idealityAssessment === null || !Array.isArray(sol.idealityAssessment.criteria)) {
+                                    // Robust migration for idealityAssessment
+                                    if (!sol.idealityAssessment || !Array.isArray(sol.idealityAssessment.criteria)) {
                                         sol.idealityAssessment = getDefaultIdealityAssessment();
                                     } else {
-                                        const newCriteriaState = [];
-                                        customIdealityCriteria.forEach(defaultCrit => {
-                                            const existingCrit = sol.idealityAssessment.criteria.find(c => c.id === defaultCrit.id);
+                                        const oldCriteria = sol.idealityAssessment.criteria;
+                                        const migratedCriteria = [];
+                                        customIdealityCriteria.forEach(currentDefaultCrit => {
+                                            const existingCrit = oldCriteria.find(c => c.id === currentDefaultCrit.id);
                                             if (existingCrit) {
-                                                newCriteriaState.push({
+                                                migratedCriteria.push({
                                                     id: existingCrit.id,
-                                                    name: defaultCrit.name, 
+                                                    name: currentDefaultCrit.name,
                                                     score: existingCrit.score,
                                                     weight: existingCrit.weight,
-                                                    description: defaultCrit.description 
+                                                    description: currentDefaultCrit.description
                                                 });
                                             } else {
-                                                newCriteriaState.push({
-                                                    id: defaultCrit.id,
-                                                    name: defaultCrit.name,
-                                                    score: defaultCrit.defaultScore,
-                                                    weight: defaultCrit.defaultWeight,
-                                                    description: defaultCrit.description
+                                                migratedCriteria.push({
+                                                    id: currentDefaultCrit.id,
+                                                    name: currentDefaultCrit.name,
+                                                    score: currentDefaultCrit.defaultScore,
+                                                    weight: currentDefaultCrit.defaultWeight,
+                                                    description: currentDefaultCrit.description
                                                 });
                                             }
                                         });
-                                        // Remove criteria that no longer exist in customIdealityCriteria
-                                        sol.idealityAssessment.criteria = newCriteriaState.filter(crit => customIdealityCriteria.some(c => c.id === crit.id));
-                                        
-                                        sol.idealityAssessment.weightedScore = calculateWeightedScore(sol.idealityAssessment.criteria);
-                                        sol.mcdmScore = sol.idealityAssessment.weightedScore;
+                                        // Filter out any criteria that no longer exist in customIdealityCriteria
+                                        sol.idealityAssessment.criteria = migratedCriteria.filter(crit => customIdealityCriteria.some(c => c.id === crit.id));
                                     }
+                                    
+                                    sol.idealityAssessment.weightedScore = calculateWeightedScore(sol.idealityAssessment.criteria);
+                                    sol.mcdmScore = sol.idealityAssessment.weightedScore;
                                 });
                             }
                         }
@@ -2535,8 +2535,8 @@
                         const childElement = currentContainer.querySelector(`#${childNode.id}`); 
                         if (childElement) { 
                             const childRect = childElement.getBoundingClientRect(); 
-                            const childCenterX_svg = (childRect.left - (scalableWrapperRect.left + wrapperPaddingLeft) + childRect.width / 2) / zoom; 
                             const childTopY_svg = (childRect.top - (scalableWrapperRect.top + wrapperPaddingTop)) / zoom; 
+                            const childCenterX_svg = (childRect.left - (scalableWrapperRect.left + wrapperPaddingLeft) + childRect.width / 2) / zoom; 
                             if (childTopY_svg > horizontalLineY_svg) { 
                                 _drawSvgLine(targetSvgLayer, childCenterX_svg, horizontalLineY_svg, childCenterX_svg, childTopY_svg, '#9ca3af', 2, zoom); 
                                 if (childNode.connectorLabelToParent && childNode.connectorLabelToParent.trim() !== "") {
@@ -3079,32 +3079,31 @@
                 if (!solution.idealityAssessment || !Array.isArray(solution.idealityAssessment.criteria)) {
                     solution.idealityAssessment = getDefaultIdealityAssessment();
                 } else {
-                    const newCriteriaState = [];
-                    customIdealityCriteria.forEach(defaultCrit => {
-                        const existingCrit = solution.idealityAssessment.criteria.find(c => c.id === defaultCrit.id);
+                    const oldCriteria = solution.idealityAssessment.criteria;
+                    const migratedCriteria = [];
+                    customIdealityCriteria.forEach(currentDefaultCrit => {
+                        const existingCrit = oldCriteria.find(c => c.id === currentDefaultCrit.id);
                         if (existingCrit) {
-                            newCriteriaState.push({
+                            migratedCriteria.push({
                                 id: existingCrit.id,
-                                name: defaultCrit.name, 
-                                score: existingCrit.score,
-                                weight: existingCrit.weight,
-                                description: defaultCrit.description 
+                                name: currentDefaultCrit.name,
+                                score: existingCrit.score, 
+                                weight: existingCrit.weight, 
+                                description: currentDefaultCrit.description 
                             });
                         } else {
-                            newCriteriaState.push({
-                                id: defaultCrit.id,
-                                name: defaultCrit.name,
-                                score: defaultCrit.defaultScore,
-                                weight: defaultCrit.defaultWeight,
-                                description: defaultCrit.description
+                            migratedCriteria.push({
+                                id: currentDefaultCrit.id,
+                                name: currentDefaultCrit.name,
+                                score: currentDefaultCrit.defaultScore,
+                                weight: currentDefaultCrit.defaultWeight,
+                                description: currentDefaultCrit.description
                             });
                         }
                     });
-                    // Filter out any criteria that are no longer in customIdealityCriteria
-                    solution.idealityAssessment.criteria = newCriteriaState.filter(crit => customIdealityCriteria.some(c => c.id === crit.id));
+                    solution.idealityAssessment.criteria = migratedCriteria.filter(crit => customIdealityCriteria.some(c => c.id === crit.id));
                 }
                 
-                // Render dynamic criteria inputs
                 domElements.idealityCriteriaContainer.innerHTML = '';
                 solution.idealityAssessment.criteria.forEach((crit, index) => {
                     const criterionDiv = document.createElement('div');
@@ -3370,7 +3369,7 @@
             saveCustomIdealityCriteria(); 
             renderCustomCriteriaList();
             hideEditCriterionForm();
-            updateAllSolutionsIdealityAssessment(); // Update existing solutions with new criteria
+            updateAllSolutionsIdealityAssessment(); 
             renderSolutionTable();
             renderIdeasLandscapeChart();
             pushStateToHistory(rcaData); 
@@ -3385,7 +3384,7 @@
                 customIdealityCriteria = customIdealityCriteria.filter(c => c.id !== criterionId);
                 saveCustomIdealityCriteria(); 
                 renderCustomCriteriaList();
-                updateAllSolutionsIdealityAssessment(); // Update existing solutions to remove this criterion
+                updateAllSolutionsIdealityAssessment(); 
                 renderSolutionTable();
                 renderIdeasLandscapeChart();
                 pushStateToHistory(rcaData); 
@@ -3406,7 +3405,6 @@
                         customIdealityCriteria.forEach(defaultCrit => {
                             const existingCrit = sol.idealityAssessment.criteria.find(c => c.id === defaultCrit.id);
                             if (existingCrit) {
-                                // Preserve existing score and weight, but update name/description from current default
                                 newCriteriaState.push({
                                     id: existingCrit.id,
                                     name: defaultCrit.name,
@@ -3415,7 +3413,6 @@
                                     description: defaultCrit.description
                                 });
                             } else {
-                                // Add new criterion with its default values
                                 newCriteriaState.push({
                                     id: defaultCrit.id,
                                     name: defaultCrit.name,
@@ -3425,10 +3422,8 @@
                                 });
                             }
                         });
-                        // Replace solution's criteria with the new state, filtering out removed criteria
                         sol.idealityAssessment.criteria = newCriteriaState.filter(crit => customIdealityCriteria.some(c => c.id === crit.id));
                         
-                        // Recalculate weighted score for the solution
                         sol.idealityAssessment.weightedScore = calculateWeightedScore(sol.idealityAssessment.criteria);
                         sol.mcdmScore = sol.idealityAssessment.weightedScore;
                     });
