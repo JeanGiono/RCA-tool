@@ -1005,7 +1005,7 @@
         // --- Global Variables, Constants, and DOM Elements ---
         function deepCopy(obj) { return JSON.parse(JSON.stringify(obj)); }
 
-        var domElements = {}; // Changed from let to var
+        var domElements = {}; 
         let rcaData = null; 
         let nodeIdCounter = 0;
         let currentAndTargetNodeId = null; 
@@ -1147,7 +1147,7 @@
                 idealityModalSolutionText: document.getElementById('ideality-modal-solution-text'),
                 assessingSolutionCauseIdInput: document.getElementById('assessing-solution-cause-id'),
                 assessingSolutionEntryIdInput: document.getElementById('assessing-solution-entry-id'),
-                idealityCriteriaContainer: document.getElementById('ideality-criteria-container'), // New
+                idealityCriteriaContainer: document.getElementById('ideality-criteria-container'), 
                 idealityTotalScoreDisplay: document.getElementById('ideality-total-score-display'),
                 idealityWeightsSumWarning: document.getElementById('ideality-weights-sum-warning'),
                 saveIdealityAssessmentButton: document.getElementById('save-ideality-assessment-button'),
@@ -1166,26 +1166,26 @@
                 menuItemCauseEffectTable: document.getElementById('menu-item-cause-effect-table'),
                 menuItemSolutionTable: document.getElementById('menu-item-solution-table'),
                 menuItemIdeasLandscape: document.getElementById('menu-item-ideas-landscape'),
-                menuItemSettings: document.getElementById('menu-item-settings'), // New
-                settingsModal: document.getElementById('settings-modal'), // New
-                closeSettingsModalButton: document.getElementById('close-settings-modal-button'), // New
-                customCriteriaList: document.getElementById('custom-criteria-list'), // New
-                addNewCriterionButton: document.getElementById('add-new-criterion-button'), // New
-                editCriterionForm: document.getElementById('edit-criterion-form'), // New
-                criterionFormTitle: document.getElementById('criterion-form-title'), // New
-                editingCriterionIdInput: document.getElementById('editing-criterion-id'), // New
-                criterionNameInput: document.getElementById('criterion-name-input'), // New
-                criterionDefaultScoreInput: document.getElementById('criterion-default-score-input'), // New
-                criterionDefaultWeightInput: document.getElementById('criterion-default-weight-input'), // New
-                criterionDescriptionInput: document.getElementById('criterion-description-input'), // New
-                cancelCriterionEditButton: document.getElementById('cancel-criterion-edit-button'), // New
-                saveCriterionButton: document.getElementById('save-criterion-button') // New
+                menuItemSettings: document.getElementById('menu-item-settings'), 
+                settingsModal: document.getElementById('settings-modal'), 
+                closeSettingsModalButton: document.getElementById('close-settings-modal-button'), 
+                customCriteriaList: document.getElementById('custom-criteria-list'), 
+                addNewCriterionButton: document.getElementById('add-new-criterion-button'), 
+                editCriterionForm: document.getElementById('edit-criterion-form'), 
+                criterionFormTitle: document.getElementById('criterion-form-title'), 
+                editingCriterionIdInput: document.getElementById('editing-criterion-id'), 
+                criterionNameInput: document.getElementById('criterion-name-input'), 
+                criterionDefaultScoreInput: document.getElementById('criterion-default-score-input'), 
+                criterionDefaultWeightInput: document.getElementById('criterion-default-weight-input'), 
+                criterionDescriptionInput: document.getElementById('criterion-description-input'), 
+                cancelCriterionEditButton: document.getElementById('cancel-criterion-edit-button'), 
+                saveCriterionButton: document.getElementById('save-criterion-button') 
             };
         }
 
         function initialize() {
             initializeDomElements(); 
-            loadCustomIdealityCriteria(); // Load custom criteria first
+            loadCustomIdealityCriteria(); 
             populateSelects();
             setupEventListeners();
             if (domElements.scalableContentWrapper) { 
@@ -1200,7 +1200,6 @@
         }
 
         function populateSelects() {
-            // 使用 trizMatrix 實例獲取參數和原理名稱
             populateSelect(domElements.improvingParameterSelect, trizMatrix.getParameters(), true); 
             populateSelect(domElements.worseningParameterSelect, trizMatrix.getParameters(), true); 
             populateSelect(domElements.solutionPrincipleSelect, trizMatrix.getInventivePrinciplesNames(), false); 
@@ -1269,7 +1268,6 @@
             });
 
             // Ideality Assessment Modal Listeners
-            // These listeners are now added dynamically in openIdealityAssessmentModal
             if (domElements.saveIdealityAssessmentButton) domElements.saveIdealityAssessmentButton.addEventListener('click', handleSaveIdealityAssessment);
             if (domElements.cancelIdealityAssessmentButton) domElements.cancelIdealityAssessmentButton.addEventListener('click', closeIdealityAssessmentModal);
             if (domElements.resetIdealityWeightsButton) domElements.resetIdealityWeightsButton.addEventListener('click', resetIdealityWeights); 
@@ -1289,12 +1287,6 @@
             if (domElements.saveCriterionButton) domElements.saveCriterionButton.addEventListener('click', handleSaveCriterion);
             if (domElements.cancelCriterionEditButton) domElements.cancelCriterionEditButton.addEventListener('click', hideEditCriterionForm);
         }
-
-        function initializeIdealityAssessmentRangeListeners(criterionId) {
-            // These listeners are now set up dynamically for each criterion in openIdealityAssessmentModal
-            // This function is no longer needed as a standalone initializer.
-        }
-
 
         // --- Utility Functions ---
         function populateSelect(selectElement, optionsArray, includeDefault = true) {
@@ -1435,22 +1427,16 @@
             if(domElements.abcSolutionFilterControls) {
                 domElements.abcSolutionFilterControls.querySelectorAll('button[data-filter-type="solution"]').forEach(button => {
                     button.classList.toggle('active', button.dataset.filter === currentAbcSolutionFilter);
-                    button.disabled = noData; // Also disable if no data
+                    button.disabled = noData; 
                 });
             }
         }
         
         // --- History Management (Undo/Redo) ---
         function pushStateToHistory(currentState, clearRedoStack = true) { 
-            // If there's no current state and no history, and no RCA data, it's an initial empty state.
-            // Or if current state is null, and there's existing history, and no RCA data, it means we're clearing the diagram.
-            // In these specific cases, we allow pushing a null/empty state.
             if ((currentState === null && historyStack.length === 0 && historyIndex === -1 && !rcaData) || 
                 (currentState === null && rcaData === null && historyStack.length > 0)) {
-                // This branch handles initial empty state or clearing the diagram
             } else if (!currentState && rcaData) { 
-                // If currentState is explicitly null/undefined but rcaData exists, it means the diagram is not empty,
-                // so we don't want to push a "null" state that would incorrectly represent an empty diagram.
                 updateButtonStates(); 
                 return; 
             } 
@@ -1465,7 +1451,7 @@
                 zoom: currentZoom, 
                 abcCauseFilter: currentAbcCauseFilter, 
                 abcSolutionFilter: currentAbcSolutionFilter,
-                customIdealityCriteria: deepCopy(customIdealityCriteria) // Save custom criteria with history
+                customIdealityCriteria: deepCopy(customIdealityCriteria) 
             }); 
             historyIndex = historyStack.length - 1; 
             if (historyStack.length > MAX_HISTORY_STATES) { 
@@ -1481,8 +1467,7 @@
                 recalculateNodeIdCounter(rcaData); 
                 currentAbcCauseFilter = historyEntry.abcCauseFilter || 'all'; 
                 currentAbcSolutionFilter = historyEntry.abcSolutionFilter || 'all'; 
-                customIdealityCriteria = historyEntry.customIdealityCriteria ? deepCopy(historyEntry.customIdealityCriteria) : deepCopy(DEFAULT_IDEALITY_CRITERIA); // Restore custom criteria
-                // Ensure criterionIdCounter is updated after loading
+                customIdealityCriteria = historyEntry.customIdealityCriteria ? deepCopy(historyEntry.customIdealityCriteria) : deepCopy(DEFAULT_IDEALITY_CRITERIA); 
                 let maxId = 0;
                 customIdealityCriteria.forEach(crit => {
                     const idNum = parseInt(crit.id.replace('crit-', ''));
@@ -1492,7 +1477,6 @@
                 });
                 criterionIdCounter = maxId;
 
-                // Ensure problem input area visibility is correct after loading
                 if (rcaData) {
                     if(domElements.problemInputArea) domElements.problemInputArea.style.display = 'none';
                     if(domElements.diagramTitle) domElements.diagramTitle.style.display = 'block';
@@ -1518,7 +1502,7 @@
             if (historyIndex > 0) { 
                 historyIndex--; 
                 if (!restoreStateFromHistory(historyStack[historyIndex])) { 
-                    historyIndex++; // Restore index if restoration failed
+                    historyIndex++; 
                 } 
             } 
             updateButtonStates(); 
@@ -1527,7 +1511,7 @@
             if (historyIndex < historyStack.length - 1) { 
                 historyIndex++; 
                 if (!restoreStateFromHistory(historyStack[historyIndex])) { 
-                    historyIndex--; // Restore index if restoration failed
+                    historyIndex--; 
                 } 
             } 
             updateButtonStates(); 
@@ -1535,10 +1519,9 @@
         
         // --- Data Loading and Saving ---
         function getDefaultIdealityAssessment() {
-            // Returns a new assessment object based on current customIdealityCriteria
             const assessment = {
                 criteria: [],
-                weightedScore: null // Will be calculated upon assessment
+                weightedScore: null 
             };
             customIdealityCriteria.forEach(crit => {
                 assessment.criteria.push({
@@ -1572,9 +1555,8 @@
                     return false;
                 }
 
-                // Load custom ideality criteria from saved data, or use defaults
                 customIdealityCriteria = parsedJson.customIdealityCriteria ? deepCopy(parsedJson.customIdealityCriteria) : deepCopy(DEFAULT_IDEALITY_CRITERIA);
-                criterionIdCounter = 0; // Reset counter for custom criteria
+                criterionIdCounter = 0; 
                 customIdealityCriteria.forEach(crit => {
                     const idNum = parseInt(crit.id.replace('crit-', ''));
                     if (!isNaN(idNum) && idNum > criterionIdCounter) {
@@ -1598,7 +1580,6 @@
                             if (typeof node.abcCategory === 'undefined') node.abcCategory = null;
                             if (typeof node.solutionsGenerated === 'undefined') node.solutionsGenerated = [];
 
-                            // Migration for old inventivePrinciples structure to new solutionsGenerated
                             if (node.inventivePrinciples && Array.isArray(node.inventivePrinciples)) {
                                 node.inventivePrinciples.forEach(oldIp => {
                                     if (!node.solutionsGenerated.some(s => s.principleName === oldIp.name && s.description === oldIp.solution)) {
@@ -1623,25 +1604,21 @@
                                     if (typeof sol.mcdmScore === 'undefined') sol.mcdmScore = null; 
                                     if (typeof sol.cost === 'undefined') sol.cost = null;
                                     
-                                    // Ensure idealityAssessment is fully initialized with custom criteria
                                     if (typeof sol.idealityAssessment === 'undefined' || sol.idealityAssessment === null || !Array.isArray(sol.idealityAssessment.criteria)) {
                                         sol.idealityAssessment = getDefaultIdealityAssessment();
                                     } else {
-                                        // Migrate/update existing criteria to match current customIdealityCriteria
                                         const newCriteriaState = [];
                                         customIdealityCriteria.forEach(defaultCrit => {
                                             const existingCrit = sol.idealityAssessment.criteria.find(c => c.id === defaultCrit.id);
                                             if (existingCrit) {
-                                                // Keep existing score/weight, but update name/description if changed in defaults
                                                 newCriteriaState.push({
                                                     id: existingCrit.id,
-                                                    name: defaultCrit.name, // Use current default name
+                                                    name: defaultCrit.name, 
                                                     score: existingCrit.score,
                                                     weight: existingCrit.weight,
-                                                    description: defaultCrit.description // Use current default description
+                                                    description: defaultCrit.description 
                                                 });
                                             } else {
-                                                // Add new default criteria if not present in old data
                                                 newCriteriaState.push({
                                                     id: defaultCrit.id,
                                                     name: defaultCrit.name,
@@ -1651,8 +1628,9 @@
                                                 });
                                             }
                                         });
-                                        sol.idealityAssessment.criteria = newCriteriaState;
-                                        // Recalculate weightedScore after migration
+                                        // Remove criteria that no longer exist in customIdealityCriteria
+                                        sol.idealityAssessment.criteria = newCriteriaState.filter(crit => customIdealityCriteria.some(c => c.id === crit.id));
+                                        
                                         sol.idealityAssessment.weightedScore = calculateWeightedScore(sol.idealityAssessment.criteria);
                                         sol.mcdmScore = sol.idealityAssessment.weightedScore;
                                     }
@@ -1718,7 +1696,7 @@
                         zoomLevel: currentZoom, 
                         abcCauseFilter: currentAbcCauseFilter, 
                         abcSolutionFilter: currentAbcSolutionFilter,
-                        customIdealityCriteria: customIdealityCriteria // Save custom criteria
+                        customIdealityCriteria: customIdealityCriteria 
                     }; 
                     localStorage.setItem('rcaDiagramData', JSON.stringify(dataToSave)); 
                     alert('圖表進度已儲存至瀏覽器！'); 
@@ -1748,7 +1726,7 @@
                     zoomLevel: currentZoom, 
                     abcCauseFilter: currentAbcCauseFilter, 
                     abcSolutionFilter: currentAbcSolutionFilter,
-                    customIdealityCriteria: customIdealityCriteria // Save custom criteria
+                    customIdealityCriteria: customIdealityCriteria 
                 }; 
                 const jsonData = JSON.stringify(dataToSave, null, 2); 
                 const blob = new Blob([jsonData], { type: 'application/json' }); 
@@ -2433,10 +2411,8 @@
                     causeNode.solutionsGenerated[solIndex].description = description;
                     causeNode.solutionsGenerated[solIndex].timeRequired = timeRequired;
                     causeNode.solutionsGenerated[solIndex].cost = cost;
-                    // Ensure idealityAssessment is initialized if it's an old solution or somehow missing
                     if (!causeNode.solutionsGenerated[solIndex].idealityAssessment || !Array.isArray(causeNode.solutionsGenerated[solIndex].idealityAssessment.criteria)) {
                          causeNode.solutionsGenerated[solIndex].idealityAssessment = getDefaultIdealityAssessment();
-                         // Recalculate MCDM score for newly initialized ideality assessment
                          causeNode.solutionsGenerated[solIndex].mcdmScore = calculateWeightedScore(causeNode.solutionsGenerated[solIndex].idealityAssessment.criteria);
                     }
                 }
@@ -3053,7 +3029,7 @@
                             if (p.cost !== null && p.cost !== undefined && p.cost > 0) {
                                 radius += Math.log10(p.cost / 100 + 1) * 2; 
                             } else if (p.ideality !== null && p.ideality !== undefined) {
-                                radius += p.ideality; // Scale based on 1-7 scale directly
+                                radius += p.ideality; 
                             }
                             return Math.min(Math.max(radius, 4), 15); 
                         }),
@@ -3063,7 +3039,7 @@
                             if (p.cost !== null && p.cost !== undefined && p.cost > 0) {
                                 radius += Math.log10(p.cost / 100 + 1) * 2.5;
                             } else if (p.ideality !== null && p.ideality !== undefined) {
-                                radius += p.ideality * 1.5; // Scale based on 1-7 scale directly
+                                radius += p.ideality * 1.5; 
                             }
                             return Math.min(Math.max(radius, 6), 18);
                         }),
@@ -3100,11 +3076,9 @@
 
                 domElements.idealityModalSolutionText.textContent = `評估方案: ${solution.description.substring(0,60)}${solution.description.length > 60 ? '...' : ''}`;
 
-                // Ensure idealityAssessment and its criteria are initialized
                 if (!solution.idealityAssessment || !Array.isArray(solution.idealityAssessment.criteria)) {
                     solution.idealityAssessment = getDefaultIdealityAssessment();
                 } else {
-                    // Update existing criteria to match current customIdealityCriteria
                     const newCriteriaState = [];
                     customIdealityCriteria.forEach(defaultCrit => {
                         const existingCrit = solution.idealityAssessment.criteria.find(c => c.id === defaultCrit.id);
@@ -3126,7 +3100,8 @@
                             });
                         }
                     });
-                    solution.idealityAssessment.criteria = newCriteriaState;
+                    // Filter out any criteria that are no longer in customIdealityCriteria
+                    solution.idealityAssessment.criteria = newCriteriaState.filter(crit => customIdealityCriteria.some(c => c.id === crit.id));
                 }
                 
                 // Render dynamic criteria inputs
@@ -3160,7 +3135,6 @@
                     `;
                     domElements.idealityCriteriaContainer.appendChild(criterionDiv);
 
-                    // Add event listeners for newly created elements
                     const rangeInput = criterionDiv.querySelector(`#ideality-crit-${crit.id}-range`);
                     const valueDisplay = criterionDiv.querySelector(`#ideality-crit-${crit.id}-value`);
                     const weightInput = criterionDiv.querySelector(`#ideality-crit-${crit.id}-weight`);
@@ -3191,10 +3165,8 @@
         
         function calculateWeightedScore(criteriaArray) {
             let totalWeightedScore = 0;
-            let totalWeightSum = 0;
             criteriaArray.forEach(crit => {
                 totalWeightedScore += crit.score * crit.weight;
-                totalWeightSum += crit.weight;
             });
             return totalWeightedScore;
         }
@@ -3264,7 +3236,6 @@
 
             if (!solution.idealityAssessment) solution.idealityAssessment = getDefaultIdealityAssessment();
             
-            // Update scores and weights from current UI
             solution.idealityAssessment.criteria.forEach(crit => {
                 const rangeInput = domElements.idealityCriteriaContainer.querySelector(`#ideality-crit-${crit.id}-range`);
                 const weightInput = domElements.idealityCriteriaContainer.querySelector(`#ideality-crit-${crit.id}-weight`);
@@ -3301,7 +3272,6 @@
                 customIdealityCriteria = deepCopy(DEFAULT_IDEALITY_CRITERIA);
                 criterionIdCounter = DEFAULT_IDEALITY_CRITERIA.length;
             } else {
-                 // Recalculate max ID for new sessions if criteria were loaded from history/file
                 let maxId = 0;
                 customIdealityCriteria.forEach(crit => {
                     const idNum = parseInt(crit.id.replace('crit-', ''));
@@ -3314,8 +3284,6 @@
         }
 
         function saveCustomIdealityCriteria() {
-            // This is implicitly saved when `pushStateToHistory` is called with diagram data
-            // and `customIdealityCriteria` is part of the state.
             console.log("Custom ideality criteria saved:", customIdealityCriteria);
         }
 
@@ -3361,7 +3329,7 @@
             } else {
                 domElements.criterionFormTitle.textContent = "新增評估準則";
                 domElements.criterionNameInput.value = '';
-                domElements.criterionDefaultScoreInput.value = 4; // Default for 7-point scale
+                domElements.criterionDefaultScoreInput.value = 4; 
                 domElements.criterionDefaultWeightInput.value = 0.25;
                 domElements.criterionDescriptionInput.value = '';
             }
@@ -3402,6 +3370,7 @@
             saveCustomIdealityCriteria(); 
             renderCustomCriteriaList();
             hideEditCriterionForm();
+            updateAllSolutionsIdealityAssessment(); // Update existing solutions with new criteria
             renderSolutionTable();
             renderIdeasLandscapeChart();
             pushStateToHistory(rcaData); 
@@ -3416,11 +3385,65 @@
                 customIdealityCriteria = customIdealityCriteria.filter(c => c.id !== criterionId);
                 saveCustomIdealityCriteria(); 
                 renderCustomCriteriaList();
+                updateAllSolutionsIdealityAssessment(); // Update existing solutions to remove this criterion
                 renderSolutionTable();
                 renderIdeasLandscapeChart();
                 pushStateToHistory(rcaData); 
             }
         }
+
+        /**
+         * 遍歷所有解決方案，更新其理想性評估準則以符合當前 global customIdealityCriteria。
+         * 這在 customIdealityCriteria 發生變化時被呼叫，以確保資料一致性。
+         */
+        function updateAllSolutionsIdealityAssessment() {
+            function traverseNodesAndUpdateSolutions(node) {
+                if (!node) return;
+
+                if (node.type === 'cause' && node.solutionsGenerated && Array.isArray(node.solutionsGenerated)) {
+                    node.solutionsGenerated.forEach(sol => {
+                        const newCriteriaState = [];
+                        customIdealityCriteria.forEach(defaultCrit => {
+                            const existingCrit = sol.idealityAssessment.criteria.find(c => c.id === defaultCrit.id);
+                            if (existingCrit) {
+                                // Preserve existing score and weight, but update name/description from current default
+                                newCriteriaState.push({
+                                    id: existingCrit.id,
+                                    name: defaultCrit.name,
+                                    score: existingCrit.score,
+                                    weight: existingCrit.weight,
+                                    description: defaultCrit.description
+                                });
+                            } else {
+                                // Add new criterion with its default values
+                                newCriteriaState.push({
+                                    id: defaultCrit.id,
+                                    name: defaultCrit.name,
+                                    score: defaultCrit.defaultScore,
+                                    weight: defaultCrit.defaultWeight,
+                                    description: defaultCrit.description
+                                });
+                            }
+                        });
+                        // Replace solution's criteria with the new state, filtering out removed criteria
+                        sol.idealityAssessment.criteria = newCriteriaState.filter(crit => customIdealityCriteria.some(c => c.id === crit.id));
+                        
+                        // Recalculate weighted score for the solution
+                        sol.idealityAssessment.weightedScore = calculateWeightedScore(sol.idealityAssessment.criteria);
+                        sol.mcdmScore = sol.idealityAssessment.weightedScore;
+                    });
+                }
+
+                if (node.children && Array.isArray(node.children)) {
+                    node.children.forEach(traverseNodesAndUpdateSolutions);
+                }
+            }
+
+            if (rcaData) {
+                traverseNodesAndUpdateSolutions(rcaData);
+            }
+        }
+
 
         // --- Other Functions ---
         function autoAdjustNodeLayout() { alert('自動調整節點功能尚待開發。'); }
