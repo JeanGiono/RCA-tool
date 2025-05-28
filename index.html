@@ -361,7 +361,7 @@
         <i class="fas fa-bars"></i>
     </button>
 
-    <main id="main-content-area" class="flex-1 p-4 md:p-8 overflow-y-auto md:ml-64 transition-all duration-300 ease-in-out">
+    <main id="main-content-area" class="flex-1 p-4 md:p-8 pt-16 overflow-y-auto md:ml-64 transition-all duration-300 ease-in-out">
         <div class="container mx-auto max-w-7xl">
             <header class="mb-6 text-center">
                 <h1 id="main-tool-title" class="text-2xl md:text-3xl font-bold text-gray-700">創新問題解決工具</h1>
@@ -767,7 +767,7 @@
                 { id: 'crit-4', name: '多符合理想性 (低成本/資源)？', defaultScore: 5, defaultWeight: 0.10, description: '此方案是否能以最低的成本、時間、人力、資源等達成目標。\n0 分：需要極高的成本和資源投入。\n5 分：成本和資源投入適中。\n10 分：幾乎不需額外成本或資源，利用現有條件達成。' },
                 { id: 'crit-5', name: '創新性/獨特性', defaultScore: 5, defaultWeight: 0.10, description: '此方案是否具有創新性或獨特性？\n0 分：缺乏新意，為常見方案。\n5 分：有一定新意，但非突破性。\n10 分：極具創新性，獨一無二，可能開創新的領域。' },
                 { id: 'crit-6', name: '實施難度/可行性', defaultScore: 5, defaultWeight: 0.10, description: '此方案的實施難度與可行性。\n0 分：實施極其困難，幾乎不可行。\n5 分：實施有一定難度，但可行。\n10 分：實施簡單，資源易得，高度可行。' },
-                { id: 'crit-7', name: '市場潛力/影響力', defaultScore: 5, defaultWeight: 0.10, description: '此方案在市場上的潛在規模、接受度及可能帶來的影響力。\n0 分：市場極小或無潛力。\n5 分：有一定市場，但影響有限。\n10 分：具備廣闊市場潛力，可能引領行業變革。' },
+                { id: 'crit-7', name: '修護環境潛力/影響力', defaultScore: 5, defaultWeight: 0.10, description: '此方案對環境的修護潛力及可能帶來的正向影響。\n0 分：可能對環境造成負面影響或無修護作用。\n5 分：中立，無明顯修護或負面影響。\n10 分：積極修護環境，帶來顯著正向影響。' },
                 { id: 'crit-8', name: '風險程度', defaultScore: 5, defaultWeight: 0.10, description: '此方案在技術、財務、市場、法規等方面存在的風險。\n0 分：風險極高，可能導致失敗。\n5 分：有可控風險，但需謹慎應對。\n10 分：風險極低，幾乎無不確定性。' },
                 { id: 'crit-9', name: '可擴展性/未來性', defaultScore: 5, defaultWeight: 0.10, description: '此方案是否易於擴展、適應未來變化，或可應用於其他領域。\n0 分：僵化，難以擴展或適應。\n5 分：具備一定彈性，可微調。\n10 分：高度靈活，易於擴展，具備廣闊應用前景。' },
                 { id: 'crit-10', name: '社會/環境責任', defaultScore: 5, defaultWeight: 0.10, description: '此方案是否符合社會道德、環保標準，並帶來正向的社會或環境效益。\n0 分：可能對社會或環境造成負面影響。\n5 分：中立，無明顯正負面影響。\n10 分：積極貢獻社會福祉和環境保護。' }
@@ -2310,7 +2310,7 @@
                 targetSvgLayer.setAttribute('viewBox', `0 0 ${unscaledDiagramWidth} ${unscaledDiagramHeight}`);
 
                 const lineVerticalOffset = 25; // 連接線的垂直偏移量
-                const scalableWrapperRect = targetScalableWrapper.getBoundingClientRect();
+                const scalableWrapperRect = targetScalableContentWrapper.getBoundingClientRect(); // 使用 domElements 引用
 
                 /**
                  * 遞迴繪製節點及其子節點的連接線。
