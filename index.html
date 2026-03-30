@@ -3,180 +3,445 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube 課程筆記生成器</title>
+    <title>專業房貸評分與準駁預估系統</title>
+    <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- 引入 Google Fonts: Noto Sans TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <!-- 引入 Phosphor Icons 增加專業感 -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
-        body { font-family: 'Noto Sans TC', sans-serif; }
-        .prose h1 { color: #1e40af; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
-        .prose h3 { color: #2563eb; margin-top: 2rem; }
-        .prose blockquote { border-left: 5px solid #3b82f6; background: #eff6ff; padding: 1rem 1.5rem; border-radius: 0.5rem; font-style: normal; color: #1e3a8a; }
-        .prose ul { list-style-type: disc; padding-left: 1.5rem; }
-        .loading-dots:after { content: '.'; animation: dots 1.5s steps(5, end) infinite; }
-        @keyframes dots { 0%, 20% { content: '.'; } 40% { content: '..'; } 60% { content: '...'; } 80%, 100% { content: ''; } }
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f1f5f9; /* Slate 50 */
+        }
+        /* 自訂動畫效果 */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* 隱藏預設數字輸入框的上下箭頭 */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 leading-relaxed">
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
 
-<div class="max-w-4xl mx-auto px-4 py-12">
-    <!-- Header -->
-    <header class="text-center mb-10">
-        <h1 class="text-4xl font-black text-blue-900 mb-3">🎓 YouTube 課程筆記生成器</h1>
-        <p class="text-gray-500 text-lg">透過 AI 快速將逐字稿轉化為精華筆記</p>
+    <!-- 頂部導航 / 標題 -->
+    <header class="bg-blue-800 text-white shadow-md">
+        <div class="max-w-6xl mx-auto px-4 py-6 flex items-center gap-3">
+            <i class="ph-fill ph-bank text-3xl"></i>
+            <div>
+                <h1 class="text-2xl font-bold tracking-wide">房貸審核智能預估系統</h1>
+                <p class="text-blue-200 text-sm mt-1">資深顧問級試算模型 ｜ 聯徵・收支比・股利財力・新青安綜合評估</p>
+            </div>
+        </div>
     </header>
 
-    <!-- App Container -->
-    <div class="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
-        <!-- Settings Section -->
-        <div class="p-6 bg-gray-50 border-b border-gray-100">
-            <label class="block text-sm font-bold text-gray-700 mb-2">Gemini API Key</label>
-            <input type="password" id="apiKeyInput" placeholder="在此輸入您的 API Key" 
-                class="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition text-sm">
-        </div>
-
-        <!-- Input Section -->
-        <div class="p-8">
-            <label class="block text-sm font-bold text-gray-700 mb-2">影片逐字稿內容</label>
-            <textarea id="transcriptInput" placeholder="請在此貼上從 YouTube 導出的逐字稿..." 
-                class="w-full h-64 px-5 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition resize-none mb-6"></textarea>
+    <!-- 主要內容區塊 -->
+    <main class="flex-grow max-w-6xl mx-auto px-4 py-8 w-full">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
-            <button onclick="handleGeneration()" id="actionBtn"
-                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-3">
-                <span id="btnText">開始生成筆記</span>
-                <div id="spinner" class="hidden w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
-            </button>
-        </div>
+            <!-- 左側：輸入表單 -->
+            <div class="lg:col-span-5 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 lg:p-8">
+                <h2 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2 border-b pb-3">
+                    <i class="ph-fill ph-note-pencil text-blue-600"></i>
+                    申貸人條件輸入
+                </h2>
 
-        <!-- Output Section -->
-        <div id="resultSection" class="hidden p-8 border-t border-gray-100 bg-white">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-bold text-gray-900">✨ 生成結果</h2>
-                <div class="flex gap-2">
-                    <button onclick="copyMarkdown()" class="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition text-gray-600 font-medium">複製內容</button>
-                    <button onclick="window.print()" class="px-4 py-2 text-sm bg-blue-50 hover:bg-blue-100 rounded-lg transition text-blue-600 font-medium">列印/PDF</button>
+                <form id="calculatorForm" class="space-y-5">
+                    
+                    <!-- 聯徵信用評分 -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">聯徵信用評分 (200-800)</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="ph ph-speedometer text-slate-400"></i>
+                            </div>
+                            <input type="number" id="creditScore" min="200" max="800" required placeholder="例如：750"
+                                class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                        </div>
+                    </div>
+
+                    <!-- 職業類別 -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">目前職業類別</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="ph ph-briefcase text-slate-400"></i>
+                            </div>
+                            <select id="occupation" required
+                                class="w-full pl-10 pr-8 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white appearance-none transition-colors">
+                                <option value="" disabled selected>請選擇職業類別</option>
+                                <option value="premium">優質企業 / 公務員 / 師字輩</option>
+                                <option value="general">一般上班族 (上市櫃外百大)</option>
+                                <option value="self_employed">自營商 / 自由工作者</option>
+                                <option value="other">其他</option>
+                            </select>
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <i class="ph ph-caret-down text-slate-400"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 每月平均薪資 -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">每月平均薪資 (新台幣)</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="ph ph-money text-slate-400"></i>
+                            </div>
+                            <input type="number" id="monthlyIncome" min="1" required placeholder="例如：60000"
+                                class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                        </div>
+                    </div>
+
+                    <!-- 每年存股股利收入 (新增選填) -->
+                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                        <label class="block text-sm font-semibold text-blue-800 mb-1">
+                            每年存股股利收入 <span class="text-xs font-normal text-blue-600">(新台幣 / 選填)</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="ph ph-chart-line-up text-blue-400"></i>
+                            </div>
+                            <input type="number" id="annualDividend" min="0" placeholder="例如：120000"
+                                class="w-full pl-10 pr-4 py-2.5 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                        </div>
+                        <p class="text-xs text-blue-600 mt-1.5 flex items-start gap-1">
+                            <i class="ph-fill ph-info text-sm"></i>
+                            系統將自動換算為「加分月收入」併入收支比計算，有助於提升過件率與貸款成數。
+                        </p>
+                    </div>
+
+                    <!-- 每月固定支出 -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">
+                            每月固定支出 <span class="text-xs font-normal text-slate-500">(含其他信貸、車貸、基本生活費)</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="ph ph-receipt text-slate-400"></i>
+                            </div>
+                            <input type="number" id="monthlyExpenses" min="0" required placeholder="例如：20000"
+                                class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                        </div>
+                    </div>
+
+                    <!-- 欲貸款總額 -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">欲貸款總額 (新台幣)</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="ph ph-house-line text-slate-400"></i>
+                            </div>
+                            <input type="number" id="loanAmount" min="100000" required placeholder="例如：12000000"
+                                class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">* 系統將以基準利率 2.2%、30年期預估您的每月房貸負擔。</p>
+                    </div>
+
+                    <!-- 計算按鈕 -->
+                    <button type="submit" 
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-4 rounded-lg shadow-md hover:shadow-lg active:scale-[0.98] transition-all duration-150 flex justify-center items-center gap-2 mt-6">
+                        <i class="ph-bold ph-calculator text-xl"></i>
+                        開始執行審核預估
+                    </button>
+                </form>
+            </div>
+
+            <!-- 右側：結果顯示區 -->
+            <div class="lg:col-span-7 flex flex-col h-full">
+                <!-- 初始空狀態 -->
+                <div id="emptyState" class="flex-grow flex flex-col items-center justify-center bg-white rounded-2xl border border-slate-200 shadow-sm p-8 text-center text-slate-400 h-full min-h-[400px]">
+                    <i class="ph-fill ph-chart-pie-slice text-6xl mb-4 text-slate-300"></i>
+                    <h3 class="text-lg font-medium text-slate-500">等待輸入資料</h3>
+                    <p class="text-sm mt-2">請於左側輸入您的財務與信用條件，<br>系統將自動產生銀行審核預估報告。</p>
+                </div>
+
+                <!-- 預估報告 (初始隱藏) -->
+                <div id="resultState" class="hidden fade-in space-y-6">
+                    
+                    <!-- 核心評等卡片 -->
+                    <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
+                        <div class="bg-slate-50 border-b border-slate-200 px-6 py-4 flex justify-between items-center">
+                            <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                <i class="ph-fill ph-check-circle text-blue-600"></i>
+                                審核結果分析報告
+                            </h2>
+                            <span class="text-xs text-slate-500 bg-white px-2 py-1 border rounded-md">僅供參考</span>
+                        </div>
+                        
+                        <div class="p-6">
+                            <div class="grid grid-cols-2 gap-4 mb-6">
+                                <!-- 銀行評等 -->
+                                <div class="bg-blue-50 rounded-xl p-4 border border-blue-100 flex flex-col items-center justify-center text-center">
+                                    <span class="text-sm font-semibold text-blue-800 mb-1">預估銀行評等</span>
+                                    <div id="resGrade" class="text-4xl font-black text-blue-600 my-1">A</div>
+                                    <span id="resGradeDesc" class="text-xs text-blue-700">優質客戶</span>
+                                </div>
+                                <!-- 可貸成數 -->
+                                <div class="bg-blue-50 rounded-xl p-4 border border-blue-100 flex flex-col items-center justify-center text-center">
+                                    <span class="text-sm font-semibold text-blue-800 mb-1">預估最高可貸成數</span>
+                                    <div id="resLTV" class="text-4xl font-black text-blue-600 my-1">80%</div>
+                                    <span class="text-xs text-blue-700">依鑑價金額為準</span>
+                                </div>
+                            </div>
+
+                            <!-- 信用分數條 -->
+                            <div class="mb-6">
+                                <div class="flex justify-between items-end mb-2">
+                                    <span class="text-sm font-semibold text-slate-700">聯徵信用評分</span>
+                                    <span id="resScoreText" class="text-lg font-bold text-slate-800">750 分</span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-3">
+                                    <div id="resScoreBar" class="h-3 rounded-full transition-all duration-1000 ease-out" style="width: 0%;"></div>
+                                </div>
+                                <div class="flex justify-between text-[10px] text-slate-400 mt-1 px-1">
+                                    <span>200</span>
+                                    <span>400</span>
+                                    <span>600</span>
+                                    <span>800</span>
+                                </div>
+                            </div>
+
+                            <!-- 收支比與試算細節 -->
+                            <div class="bg-slate-50 rounded-lg p-4 border border-slate-200 space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-slate-600">預估房貸月還款 (30年, 2.2%)</span>
+                                    <span id="resMonthlyMortgage" class="font-semibold text-slate-800">NT$ 0</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-slate-600">總月支出 (含原本支出)</span>
+                                    <span id="resTotalExpense" class="font-semibold text-slate-800">NT$ 0</span>
+                                </div>
+                                <div class="w-full h-[1px] bg-slate-200 my-2"></div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm font-semibold text-slate-700">銀行認定月收入 <span class="text-xs font-normal text-slate-500">(含股利月均)</span></span>
+                                    <span id="resTotalIncome" class="font-bold text-blue-700">NT$ 0</span>
+                                </div>
+                                <div class="flex justify-between items-center pt-1">
+                                    <span class="text-sm font-semibold text-slate-700">核心收支比 (DTI)</span>
+                                    <div class="flex items-center gap-2">
+                                        <span id="resDTI" class="font-bold text-lg text-slate-800">0%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 風險警示專區 (動態顯示) -->
+                    <div id="warningCard" class="hidden bg-red-50 border border-red-200 rounded-xl p-5 flex gap-4">
+                        <i class="ph-fill ph-warning-circle text-2xl text-red-500 flex-shrink-0"></i>
+                        <div>
+                            <h3 class="text-red-800 font-bold mb-1">高風險警示：收支比過高或信用異常</h3>
+                            <p id="warningText" class="text-sm text-red-700 leading-relaxed">
+                                您的收支比大於 60% 或信用評分低於 600 分。銀行極有可能要求增加保證人，或直接婉拒貸款申請。建議先清償部分信貸或增加自備款以降低貸款成數。
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- 新青安貸款專區 (動態顯示) -->
+                    <div id="youthLoanCard" class="hidden bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl p-5 relative overflow-hidden">
+                        <!-- 裝飾背景圖示 -->
+                        <i class="ph-fill ph-plant absolute -right-4 -bottom-4 text-8xl text-green-500 opacity-10"></i>
+                        
+                        <div class="relative z-10">
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="bg-green-600 text-white text-xs font-bold px-2 py-1 rounded">推薦專案</span>
+                                <h3 class="text-green-800 font-bold text-lg">符合「新青安貸款」資格潛力</h3>
+                            </div>
+                            <p class="text-sm text-green-700 mb-4 leading-relaxed">
+                                您的預估貸款額度在 1000 萬內且財務體質佳。若您與配偶、未成年子女名下皆無自有住宅，強烈建議申請新青年安心成家房貸！
+                            </p>
+                            <ul class="text-sm text-green-800 space-y-2 font-medium">
+                                <li class="flex items-center gap-2"><i class="ph-bold ph-check text-green-600"></i> 最高貸款額度可達 1,000 萬元</li>
+                                <li class="flex items-center gap-2"><i class="ph-bold ph-check text-green-600"></i> 貸款年限最長可達 40 年 (有效降低月還款)</li>
+                                <li class="flex items-center gap-2"><i class="ph-bold ph-check text-green-600"></i> 寬限期最長 5 年 (期間僅需繳息)</li>
+                                <li class="flex items-center gap-2"><i class="ph-bold ph-check text-green-600"></i> 享有政府利息補貼，減輕初期負擔</li>
+                            </ul>
+                        </div>
+                    </div>
+
                 </div>
             </div>
-            <div id="renderOutput" class="prose prose-blue max-w-none"></div>
         </div>
-    </div>
+    </main>
 
-    <footer class="mt-8 text-center text-gray-400 text-sm">
-        專為 GitHub Pages 部署優化 | 採用 Gemini 2.5 Flash 模型
+    <!-- 頁尾 -->
+    <footer class="bg-slate-800 text-slate-400 text-center py-6 text-sm mt-auto">
+        <p>© 2026 房貸審核智能預估系統. 僅供初步評估參考，實際核貸結果依各銀行最終審查為準。</p>
     </footer>
-</div>
 
-<!-- Simple Toast Message -->
-<div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 px-6 py-3 bg-gray-900 text-white rounded-full shadow-xl opacity-0 transition-opacity pointer-events-none"></div>
+    <!-- 核心邏輯 JavaScript -->
+    <script>
+        document.getElementById('calculatorForm').addEventListener('submit', function(e) {
+            e.preventDefault();
 
-<script>
-    // 預填你提供的 Key (僅供本地測試，部署至 GitHub 前建議清空讓使用者自行輸入)
-    const DEFAULT_KEY = ""; 
-    let currentMarkdown = "";
+            // 1. 取得輸入數值
+            const score = parseInt(document.getElementById('creditScore').value);
+            const occupation = document.getElementById('occupation').value;
+            const salary = parseFloat(document.getElementById('monthlyIncome').value);
+            const expenses = parseFloat(document.getElementById('monthlyExpenses').value);
+            const loanAmount = parseFloat(document.getElementById('loanAmount').value);
+            
+            // 處理選填的股利收入，若無填寫則視為 0
+            const dividendInput = document.getElementById('annualDividend').value;
+            const annualDividend = dividendInput ? parseFloat(dividendInput) : 0;
+            const monthlyDividend = annualDividend / 12;
 
-    document.addEventListener('DOMContentLoaded', () => {
-        const savedKey = localStorage.getItem('yt_note_api_key');
-        const keyInput = document.getElementById('apiKeyInput');
-        if (savedKey) {
-            keyInput.value = savedKey;
-        } else if (DEFAULT_KEY) {
-            keyInput.value = DEFAULT_KEY;
-        }
-    });
+            // 銀行認定總月收入 = 本薪 + (年股利 / 12)
+            const totalRecognizedIncome = salary + monthlyDividend;
 
-    async function handleGeneration() {
-        const apiKey = document.getElementById('apiKeyInput').value.trim();
-        const transcript = document.getElementById('transcriptInput').value.trim();
-        
-        if (!apiKey) return showToast("請輸入 API Key");
-        if (!transcript) return showToast("請提供逐字稿內容");
-
-        localStorage.setItem('yt_note_api_key', apiKey);
-
-        const btn = document.getElementById('actionBtn');
-        const btnText = document.getElementById('btnText');
-        const spinner = document.getElementById('spinner');
-        const resultSection = document.getElementById('resultSection');
-
-        // UI 鎖定
-        btn.disabled = true;
-        btnText.innerText = "正在分析逐字稿";
-        btnText.classList.add('loading-dots');
-        spinner.classList.remove('hidden');
-
-        try {
-            const result = await callGeminiAPI(apiKey, transcript);
-            currentMarkdown = result;
-            document.getElementById('renderOutput').innerHTML = marked.parse(result);
-            resultSection.classList.remove('hidden');
-            resultSection.scrollIntoView({ behavior: 'smooth' });
-        } catch (error) {
-            showToast("錯誤: " + error.message);
-        } finally {
-            btn.disabled = false;
-            btnText.innerText = "開始生成筆記";
-            btnText.classList.remove('loading-dots');
-            spinner.classList.add('hidden');
-        }
-    }
-
-    async function callGeminiAPI(key, text) {
-        const systemPrompt = `角色：你是一位專業的課程設計師與知識管理專家。
-任務：根據提供的 YouTube 逐字稿生成結構化課程筆記。
-要求：
-- 課程標題：使用 <h1>。
-- 核心摘要：用一段話放在 <blockquote>。
-- 章節重點：使用 <h3>，包含關鍵概念(清單)與深度解析。
-- 行動清單：最後提供 3 個實作建議。
-- 語言：台灣繁體中文。`;
-
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${key}`;
-        
-        const response = await fetchWithRetry(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: `逐字稿：\n${text}` }] }],
-                systemInstruction: { parts: [{ text: systemPrompt }] }
-            })
-        });
-
-        return response.candidates[0].content.parts[0].text;
-    }
-
-    async function fetchWithRetry(url, options, retries = 5) {
-        let delay = 1000;
-        for (let i = 0; i < retries; i++) {
-            const resp = await fetch(url, options);
-            if (resp.ok) return await resp.json();
-            if (resp.status !== 429 && resp.status < 500) {
-                const err = await resp.json();
-                throw new Error(err.error?.message || "請求失敗");
+            // 防呆：薪資與股利加總不能為 0
+            if (totalRecognizedIncome <= 0) {
+                alert("月薪與股利加總必須大於 0 才能進行收支比計算。");
+                return;
             }
-            await new Promise(r => setTimeout(r, delay));
-            delay *= 2;
-        }
-        throw new Error("超過重試次數");
-    }
 
-    function showToast(msg) {
-        const toast = document.getElementById('toast');
-        toast.innerText = msg;
-        toast.classList.replace('opacity-0', 'opacity-100');
-        setTimeout(() => toast.classList.replace('opacity-100', 'opacity-0'), 3000);
-    }
+            // 2. 房貸月還款試算 (本息平均攤還法)
+            // 預設：利率 2.2% (0.022), 30年 (360期)
+            const annualInterestRate = 0.022;
+            const monthlyInterestRate = annualInterestRate / 12;
+            const totalMonths = 360;
+            
+            // PMT 公式：P * [r * (1+r)^n] / [(1+r)^n - 1]
+            const temp = Math.pow(1 + monthlyInterestRate, totalMonths);
+            const pmt = loanAmount * (monthlyInterestRate * temp) / (temp - 1);
+            const estimatedMortgage = Math.round(pmt);
 
-    function copyMarkdown() {
-        const el = document.createElement('textarea');
-        el.value = currentMarkdown;
-        document.body.appendChild(el);
-        el.select();
-        document.execCommand('copy');
-        document.body.removeChild(el);
-        showToast("已複製到剪貼簿！");
-    }
-</script>
+            // 3. 計算收支比 (DTI = Debt-to-Income Ratio)
+            const totalMonthlyDebt = expenses + estimatedMortgage;
+            // 改用加入了股利的 totalRecognizedIncome 計算 DTI
+            const dti = totalMonthlyDebt / totalRecognizedIncome;
+            const dtiPercentage = (dti * 100).toFixed(1);
 
+            // 4. 判斷銀行評等與可貸成數
+            let grade = '';
+            let gradeDesc = '';
+            let ltv = '';
+            let gradeColorClass = '';
+
+            if (score < 500) {
+                // 信用極差，高機率拒貸
+                grade = 'D';
+                gradeDesc = '婉拒核貸';
+                ltv = '0%';
+                gradeColorClass = 'text-slate-600';
+            } else if (score < 600 || dti > 0.60) {
+                // 信用瑕疵或收支比過高
+                grade = 'C';
+                gradeDesc = '高風險客戶';
+                ltv = '60-70%';
+                gradeColorClass = 'text-red-600';
+            } else if (score >= 700 && dti < 0.45 && occupation === 'premium') {
+                // 完美條件
+                grade = 'A';
+                gradeDesc = '極優質客戶';
+                ltv = '80%';
+                gradeColorClass = 'text-green-600';
+            } else {
+                // 一般正常客戶 (分數 600-699 或 DTI 45-60% 或 條件好但職業一般)
+                grade = 'B';
+                gradeDesc = '一般良好客戶';
+                ltv = '75%';
+                gradeColorClass = 'text-blue-600';
+            }
+
+            // 5. 更新 UI 介面
+            document.getElementById('emptyState').classList.add('hidden');
+            const resultState = document.getElementById('resultState');
+            resultState.classList.remove('hidden');
+            
+            // 重新觸發動畫
+            resultState.classList.remove('fade-in');
+            void resultState.offsetWidth; // trigger reflow
+            resultState.classList.add('fade-in');
+
+            // 填寫基本數據
+            const resGradeEl = document.getElementById('resGrade');
+            resGradeEl.textContent = grade;
+            resGradeEl.className = `text-5xl font-black my-1 ${gradeColorClass}`;
+            document.getElementById('resGradeDesc').textContent = gradeDesc;
+            document.getElementById('resLTV').textContent = ltv;
+            
+            document.getElementById('resMonthlyMortgage').textContent = `NT$ ${estimatedMortgage.toLocaleString()}`;
+            document.getElementById('resTotalExpense').textContent = `NT$ ${Math.round(totalMonthlyDebt).toLocaleString()}`;
+            // 顯示加入股利後的銀行認定月收入
+            document.getElementById('resTotalIncome').textContent = `NT$ ${Math.round(totalRecognizedIncome).toLocaleString()}`;
+            
+            const resDTIEl = document.getElementById('resDTI');
+            resDTIEl.textContent = `${dtiPercentage}%`;
+            if (dti > 0.6) {
+                resDTIEl.classList.remove('text-slate-800', 'text-green-600');
+                resDTIEl.classList.add('text-red-600');
+            } else if (dti < 0.45) {
+                resDTIEl.classList.remove('text-slate-800', 'text-red-600');
+                resDTIEl.classList.add('text-green-600');
+            } else {
+                resDTIEl.classList.remove('text-red-600', 'text-green-600');
+                resDTIEl.classList.add('text-slate-800');
+            }
+
+            // 信用分數條動畫與顏色
+            document.getElementById('resScoreText').textContent = `${score} 分`;
+            const scoreBar = document.getElementById('resScoreBar');
+            // 計算百分比 (200-800)
+            let percentage = ((score - 200) / 600) * 100;
+            if(percentage < 0) percentage = 0;
+            if(percentage > 100) percentage = 100;
+            
+            // 設定顏色
+            scoreBar.classList.remove('bg-red-500', 'bg-yellow-400', 'bg-green-500');
+            if (score < 500) scoreBar.classList.add('bg-red-500');
+            else if (score < 600) scoreBar.classList.add('bg-yellow-400');
+            else scoreBar.classList.add('bg-green-500');
+            
+            setTimeout(() => {
+                scoreBar.style.width = `${percentage}%`;
+            }, 100);
+
+            // 6. 處理動態卡片 (風險警示 & 新青安)
+            const warningCard = document.getElementById('warningCard');
+            const youthLoanCard = document.getElementById('youthLoanCard');
+
+            // 警示邏輯
+            if (grade === 'C' || grade === 'D') {
+                warningCard.classList.remove('hidden');
+                let reason = [];
+                if (score < 600) reason.push('聯徵信用評分低於 600 分');
+                if (dti > 0.60) reason.push('收支比 (DTI) 大於 60%');
+                document.getElementById('warningText').innerHTML = 
+                    `系統偵測到您的 <b>${reason.join(' 且 ')}</b>。<br>這在銀行授信政策中屬於高風險區間，極有可能被要求提供實力堅強之保證人，或直接遭婉拒核貸。建議先降低貸款金額、清償現有債務或培養信用後再行申請。`;
+            } else {
+                warningCard.classList.add('hidden');
+            }
+
+            // 新青安邏輯 (額度 <= 1000萬 且 財務健康 A或B)
+            if (loanAmount <= 10000000 && (grade === 'A' || grade === 'B')) {
+                youthLoanCard.classList.remove('hidden');
+            } else {
+                youthLoanCard.classList.add('hidden');
+            }
+            
+            // 自動滾動到結果區 (手機版體驗佳)
+            if(window.innerWidth < 1024) {
+                setTimeout(() => {
+                    resultState.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 150);
+            }
+        });
+    </script>
 </body>
 </html>
+
 
