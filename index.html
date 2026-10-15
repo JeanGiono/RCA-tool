@@ -1,500 +1,1892 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>專業房貸預估系統</title>
-    <!-- 引入 Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入 Google Fonts: Noto Sans TC -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    <!-- 引入 Phosphor Icons 增加專業感 -->
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <style>
-        body {
-            font-family: 'Noto Sans TC', sans-serif;
-            background-color: #f1f5f9; /* Slate 50 */
-        }
-        /* 自訂動畫效果 */
-        .fade-in {
-            animation: fadeIn 0.5s ease-in-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        /* 隱藏預設數字輸入框的上下箭頭 */
-        input[type="number"]::-webkit-outer-spin-button,
-        input[type="number"]::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        input[type="number"] {
-            -moz-appearance: textfield;
-        }
-        /* LINE 品牌色 */
-        .bg-line {
-            background-color: #06C755;
-        }
-        .hover\:bg-line-dark:hover {
-            background-color: #05b34c;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#e11d48" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="櫻花廚電助手" />
+  <title>SAKURA 櫻花智慧廚電助手｜DR7397 除油煙機 & EG2351G IH感應爐</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      font-family: 'Inter', 'Noto Sans TC', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      background-color: #0f172a;
+      color: #f8fafc;
+      overflow-x: hidden;
+    }
+    .led-font {
+      font-family: 'Courier New', Courier, monospace;
+      letter-spacing: 0.06em;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    @keyframes pulse-slow {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+    .animate-blink {
+      animation: pulse-slow 1.1s infinite;
+    }
+  </style>
 </head>
-<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 pb-24">
 
-    <!-- 頂部導航 / 標題 -->
-    <header class="bg-blue-800 text-white shadow-md">
-        <div class="max-w-6xl mx-auto px-4 py-6 flex items-center gap-3">
-            <i class="ph-fill ph-bank text-3xl"></i>
-            <div>
-                <h1 class="text-2xl font-bold tracking-wide">房貸審核智能預估系統</h1>
-                <p class="text-blue-200 text-sm mt-1">資深顧問級試算模型 ｜ 聯徵・收支比・年終股利・新青安綜合評估</p>
-            </div>
+  <!-- Top Android App Header -->
+  <header class="sticky top-0 z-30 bg-slate-900/95 backdrop-blur border-b border-slate-800 px-3 py-2.5 shadow-lg">
+    <div class="max-w-2xl mx-auto flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-rose-600 to-pink-600 flex items-center justify-center shadow-md shadow-rose-900/40 shrink-0">
+          <span class="font-bold text-white text-sm tracking-tighter">🌸</span>
         </div>
-    </header>
-
-    <!-- 主要內容區塊 -->
-    <main class="flex-grow max-w-6xl mx-auto px-4 py-8 w-full">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            
-            <!-- 左側：輸入表單 -->
-            <div class="lg:col-span-5 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 lg:p-8">
-                <h2 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2 border-b pb-3">
-                    <i class="ph-fill ph-note-pencil text-blue-600"></i>
-                    申貸人條件輸入
-                </h2>
-
-                <form id="calculatorForm" class="space-y-5">
-                    
-                    <!-- 聯徵信用評分 -->
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1">聯徵信用評分 (200-800)</label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="ph ph-speedometer text-slate-400"></i>
-                            </div>
-                            <input type="number" id="creditScore" min="200" max="800" required placeholder="例如：750"
-                                class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
-                        </div>
-                    </div>
-
-                    <!-- 職業類別 -->
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1">目前職業類別</label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="ph ph-briefcase text-slate-400"></i>
-                            </div>
-                            <select id="occupation" required
-                                class="w-full pl-10 pr-8 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white appearance-none transition-colors">
-                                <option value="" disabled selected>請選擇職業類別</option>
-                                <option value="premium">優質企業 / 公務員 / 師字輩</option>
-                                <option value="general">一般上班族 (上市櫃外百大)</option>
-                                <option value="self_employed">自營商 / 自由工作者</option>
-                                <option value="other">其他</option>
-                            </select>
-                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                <i class="ph ph-caret-down text-slate-400"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 每月平均薪資 -->
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1">每月平均薪資 (新台幣)</label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="ph ph-money text-slate-400"></i>
-                            </div>
-                            <input type="number" id="monthlyIncome" min="1" required placeholder="例如：60000"
-                                class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
-                        </div>
-                    </div>
-
-                    <!-- 加分財力區塊 (年終/股利) -->
-                    <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 space-y-4">
-                        <div class="flex items-center gap-2 mb-1">
-                            <i class="ph-fill ph-plus-circle text-blue-500"></i>
-                            <span class="text-sm font-bold text-blue-800">加分財力證明 (選填，有助於降低收支比)</span>
-                        </div>
-                        
-                        <!-- 預估年終獎金 -->
-                        <div>
-                            <label class="block text-sm font-semibold text-blue-800 mb-1">
-                                年終獎金 <span class="text-xs font-normal text-blue-600">(幾個月)</span>
-                            </label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="ph ph-gift text-blue-400"></i>
-                                </div>
-                                <input type="number" id="annualBonus" min="0" step="0.1" placeholder="例如：1.5"
-                                    class="w-full pl-10 pr-4 py-2.5 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
-                            </div>
-                        </div>
-
-                        <!-- 每年存股股利收入 -->
-                        <div>
-                            <label class="block text-sm font-semibold text-blue-800 mb-1">
-                                每年存股股利收入 <span class="text-xs font-normal text-blue-600">(新台幣)</span>
-                            </label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="ph ph-chart-line-up text-blue-400"></i>
-                                </div>
-                                <input type="number" id="annualDividend" min="0" placeholder="例如：120000"
-                                    class="w-full pl-10 pr-4 py-2.5 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 每月固定支出 -->
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1">
-                            每月固定支出 <span class="text-xs font-normal text-slate-500">(含其他信貸、車貸、基本生活費)</span>
-                        </label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="ph ph-receipt text-slate-400"></i>
-                            </div>
-                            <input type="number" id="monthlyExpenses" min="0" required placeholder="例如：20000"
-                                class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
-                        </div>
-                    </div>
-
-                    <!-- 欲貸款總額 -->
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1">欲貸款總額 (新台幣)</label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="ph ph-house-line text-slate-400"></i>
-                            </div>
-                            <input type="number" id="loanAmount" min="100000" required placeholder="例如：12000000"
-                                class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
-                        </div>
-                        <p class="text-xs text-slate-500 mt-1">* 系統將以基準利率 2.2%、30年期預估您的每月房貸負擔。</p>
-                    </div>
-
-                    <!-- 計算按鈕 -->
-                    <button type="submit" 
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-4 rounded-lg shadow-md hover:shadow-lg active:scale-[0.98] transition-all duration-150 flex justify-center items-center gap-2 mt-6">
-                        <i class="ph-bold ph-calculator text-xl"></i>
-                        開始執行審核預估
-                    </button>
-                </form>
-            </div>
-
-            <!-- 右側：結果顯示區 -->
-            <div class="lg:col-span-7 flex flex-col h-full">
-                <!-- 初始空狀態 -->
-                <div id="emptyState" class="flex-grow flex flex-col items-center justify-center bg-white rounded-2xl border border-slate-200 shadow-sm p-8 text-center text-slate-400 h-full min-h-[400px]">
-                    <i class="ph-fill ph-chart-pie-slice text-6xl mb-4 text-slate-300"></i>
-                    <h3 class="text-lg font-medium text-slate-500">等待輸入資料</h3>
-                    <p class="text-sm mt-2">請於左側輸入您的財務與信用條件，<br>系統將自動產生銀行審核預估報告。</p>
-                </div>
-
-                <!-- 預估報告 (初始隱藏) -->
-                <div id="resultState" class="hidden fade-in space-y-6">
-                    
-                    <!-- 核心評等卡片 -->
-                    <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
-                        <div class="bg-slate-50 border-b border-slate-200 px-6 py-4 flex flex-wrap gap-3 justify-between items-center">
-                            <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                                <i class="ph-fill ph-check-circle text-blue-600"></i>
-                                審核結果分析報告
-                            </h2>
-                            <!-- LINE 分享按鈕 -->
-                            <button onclick="shareToLine()" class="bg-line hover:bg-line-dark text-white text-sm font-bold py-1.5 px-3 rounded-full shadow transition-colors flex items-center gap-1.5">
-                                <i class="ph-fill ph-chat-circle text-lg"></i>
-                                分享至 LINE
-                            </button>
-                        </div>
-                        
-                        <div class="p-6">
-                            <div class="grid grid-cols-2 gap-4 mb-6">
-                                <!-- 銀行評等 -->
-                                <div class="bg-blue-50 rounded-xl p-4 border border-blue-100 flex flex-col items-center justify-center text-center">
-                                    <span class="text-sm font-semibold text-blue-800 mb-1">預估銀行評等</span>
-                                    <div id="resGrade" class="text-4xl font-black text-blue-600 my-1">A</div>
-                                    <span id="resGradeDesc" class="text-xs text-blue-700">優質客戶</span>
-                                </div>
-                                <!-- 可貸成數 -->
-                                <div class="bg-blue-50 rounded-xl p-4 border border-blue-100 flex flex-col items-center justify-center text-center">
-                                    <span class="text-sm font-semibold text-blue-800 mb-1">預估最高可貸成數</span>
-                                    <div id="resLTV" class="text-4xl font-black text-blue-600 my-1">80%</div>
-                                    <span class="text-xs text-blue-700">依鑑價金額為準</span>
-                                </div>
-                            </div>
-
-                            <!-- 信用分數條 -->
-                            <div class="mb-6">
-                                <div class="flex justify-between items-end mb-2">
-                                    <span class="text-sm font-semibold text-slate-700">聯徵信用評分</span>
-                                    <span id="resScoreText" class="text-lg font-bold text-slate-800">750 分</span>
-                                </div>
-                                <div class="w-full bg-slate-200 rounded-full h-3">
-                                    <div id="resScoreBar" class="h-3 rounded-full transition-all duration-1000 ease-out" style="width: 0%;"></div>
-                                </div>
-                                <div class="flex justify-between text-[10px] text-slate-400 mt-1 px-1">
-                                    <span>200</span>
-                                    <span>400</span>
-                                    <span>600</span>
-                                    <span>800</span>
-                                </div>
-                            </div>
-
-                            <!-- 收支比與試算細節 -->
-                            <div class="bg-slate-50 rounded-lg p-4 border border-slate-200 space-y-3">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm text-slate-600">預估房貸月還款 (30年, 2.2%)</span>
-                                    <span id="resMonthlyMortgage" class="font-semibold text-slate-800">NT$ 0</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm text-slate-600">總月支出 (含原本支出)</span>
-                                    <span id="resTotalExpense" class="font-semibold text-slate-800">NT$ 0</span>
-                                </div>
-                                <div class="w-full h-[1px] bg-slate-200 my-2"></div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm font-semibold text-slate-700">銀行認定月收入 <span class="text-xs font-normal text-slate-500">(含年終/股利月均)</span></span>
-                                    <span id="resTotalIncome" class="font-bold text-blue-700">NT$ 0</span>
-                                </div>
-                                <div class="flex justify-between items-center pt-1">
-                                    <span class="text-sm font-semibold text-slate-700">核心收支比 (DTI)</span>
-                                    <div class="flex items-center gap-2">
-                                        <span id="resDTI" class="font-bold text-lg text-slate-800">0%</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 風險警示專區 (動態顯示) -->
-                    <div id="warningCard" class="hidden bg-red-50 border border-red-200 rounded-xl p-5 flex gap-4">
-                        <i class="ph-fill ph-warning-circle text-2xl text-red-500 flex-shrink-0"></i>
-                        <div>
-                            <h3 class="text-red-800 font-bold mb-1">高風險警示：收支比過高或信用異常</h3>
-                            <p id="warningText" class="text-sm text-red-700 leading-relaxed">
-                                您的收支比大於 60% 或信用評分低於 600 分。銀行極有可能要求增加保證人，或直接婉拒貸款申請。建議先清償部分信貸或增加自備款以降低貸款成數。
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- 新青安貸款專區 (動態顯示) -->
-                    <div id="youthLoanCard" class="hidden bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl p-5 relative overflow-hidden">
-                        <!-- 裝飾背景圖示 -->
-                        <i class="ph-fill ph-plant absolute -right-4 -bottom-4 text-8xl text-green-500 opacity-10"></i>
-                        
-                        <div class="relative z-10">
-                            <div class="flex items-center gap-2 mb-3">
-                                <span class="bg-green-600 text-white text-xs font-bold px-2 py-1 rounded">推薦專案</span>
-                                <h3 class="text-green-800 font-bold text-lg">符合「新青安貸款」資格潛力</h3>
-                            </div>
-                            <p class="text-sm text-green-700 mb-4 leading-relaxed">
-                                您的預估貸款額度在 1000 萬內且財務體質佳。若您與配偶、未成年子女名下皆無自有住宅，強烈建議申請新青年安心成家房貸！
-                            </p>
-                            <ul class="text-sm text-green-800 space-y-2 font-medium">
-                                <li class="flex items-center gap-2"><i class="ph-bold ph-check text-green-600"></i> 最高貸款額度可達 1,000 萬元</li>
-                                <li class="flex items-center gap-2"><i class="ph-bold ph-check text-green-600"></i> 貸款年限最長可達 40 年 (有效降低月還款)</li>
-                                <li class="flex items-center gap-2"><i class="ph-bold ph-check text-green-600"></i> 寬限期最長 5 年 (期間僅需繳息)</li>
-                                <li class="flex items-center gap-2"><i class="ph-bold ph-check text-green-600"></i> 享有政府利息補貼，減輕初期負擔</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
+        <div class="truncate">
+          <div class="flex items-center gap-1.5">
+            <h1 class="text-sm sm:text-base font-bold text-white truncate">SAKURA 櫻花智慧廚電</h1>
+            <span class="text-[10px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 font-medium">Android 版</span>
+          </div>
+          <p class="text-[11px] text-slate-400 truncate">DR7397 除油煙機 ‧ EG2351G 系列 IH爐</p>
         </div>
-    </main>
+      </div>
 
-    <!-- 頁尾 -->
-    <footer class="bg-slate-800 text-slate-400 text-center py-6 text-sm mt-auto">
-        <p>© 2026 房貸審核智能預估系統. 僅供初步評估參考，實際核貸結果依各銀行最終審查為準。</p>
-    </footer>
+      <div class="flex items-center gap-1.5 shrink-0">
+        <button id="btn-open-search" type="button" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition" title="搜尋說明書">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M16.65 10.825a5.825 5.825 0 11-11.65 0 5.825 5.825 0 0111.65 0z"/></svg>
+        </button>
+        <button id="btn-open-install" type="button" class="px-2.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold shadow transition flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+          <span>安裝至手機</span>
+        </button>
+      </div>
+    </div>
 
-    <!-- 核心邏輯 JavaScript -->
-    <script>
-        document.getElementById('calculatorForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+    <!-- Global Device Filter Bar -->
+    <div class="max-w-2xl mx-auto mt-2.5 flex items-center gap-1.5 bg-slate-950/90 p-1 rounded-xl border border-slate-800">
+      <button type="button" data-device-filter="all" class="device-filter-btn flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold transition bg-rose-600 text-white shadow">
+        雙機整合總覽
+      </button>
+      <button type="button" data-device-filter="hood" class="device-filter-btn flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-white">
+        🌀 DR7397 除油煙機
+      </button>
+      <button type="button" data-device-filter="ih" class="device-filter-btn flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-white">
+        🔥 EG2351G IH感應爐
+      </button>
+    </div>
+  </header>
 
-            // 1. 取得輸入數值
-            const score = parseInt(document.getElementById('creditScore').value);
-            const occupation = document.getElementById('occupation').value;
-            const salary = parseFloat(document.getElementById('monthlyIncome').value);
-            const expenses = parseFloat(document.getElementById('monthlyExpenses').value);
-            const loanAmount = parseFloat(document.getElementById('loanAmount').value);
-            
-            // 處理選填的年終獎金與股利收入，若無填寫則視為 0
-            const bonusInput = document.getElementById('annualBonus').value;
-            const bonusMonths = bonusInput ? parseFloat(bonusInput) : 0;
-            const dividendInput = document.getElementById('annualDividend').value;
-            const annualDividend = dividendInput ? parseFloat(dividendInput) : 0;
-            
-            // 年終換算成月平均 = (本薪 * 獎金月數) / 12
-            const monthlyBonus = (salary * bonusMonths) / 12;
-            const monthlyDividend = annualDividend / 12;
+  <!-- Main Content Container -->
+  <main class="flex-1 max-w-2xl w-full mx-auto px-3 pt-3 space-y-4">
 
-            // 銀行認定總月收入 = 本薪 + 年終月均 + 股利月均
-            const totalRecognizedIncome = salary + monthlyBonus + monthlyDividend;
+    <!-- ==================== TAB 1: 互動面板模擬與功能教學 ==================== -->
+    <section id="tab-panel" class="tab-section space-y-4">
 
-            // 防呆：總認定月收入不能小於等於 0
-            if (totalRecognizedIncome <= 0) {
-                alert("月收入加總必須大於 0 才能進行收支比計算。");
-                return;
-            }
+      <!-- Quick Status Banner -->
+      <div class="bg-gradient-to-r from-slate-900 via-slate-900 to-rose-950/60 border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between gap-3">
+        <div>
+          <span class="text-[11px] font-semibold text-rose-400 uppercase tracking-wider">互動觸控模擬器</span>
+          <h2 class="text-sm font-bold text-white mt-0.5">點擊下方虛擬按鍵，即時體驗面板顯示與操作邏輯</h2>
+          <p class="text-xs text-slate-400 mt-0.5">完整還原說明書 P.06–09 (DR7397) 及 P.03–07 (EG2351G)</p>
+        </div>
+        <button id="btn-reset-simulators" type="button" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs border border-slate-700">
+          重置面板
+        </button>
+      </div>
 
-            // 2. 房貸月還款試算 (本息平均攤還法)
-            // 預設：利率 2.2% (0.022), 30年 (360期)
-            const annualInterestRate = 0.022;
-            const monthlyInterestRate = annualInterestRate / 12;
-            const totalMonths = 360;
-            
-            // PMT 公式：P * [r * (1+r)^n] / [(1+r)^n - 1]
-            const temp = Math.pow(1 + monthlyInterestRate, totalMonths);
-            const pmt = loanAmount * (monthlyInterestRate * temp) / (temp - 1);
-            const estimatedMortgage = Math.round(pmt);
+      <!-- DR7397 Range Hood Interactive Simulator -->
+      <div data-device-box="hood" class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+        <div class="px-4 py-3 bg-slate-800/60 border-b border-slate-800 flex items-center justify-between">
+          <div>
+            <span class="text-[11px] px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 font-medium">DR7397L/XL ‧ DR9397L/XL</span>
+            <h3 class="text-sm font-bold text-white mt-1">櫻花 AI 智能風控近吸除油煙機 觸控面板</h3>
+          </div>
+          <span id="hood-baffle-badge" class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-medium">
+            入風口：收回狀態
+          </span>
+        </div>
 
-            // 3. 計算收支比 (DTI = Debt-to-Income Ratio)
-            const totalMonthlyDebt = expenses + estimatedMortgage;
-            // 改用加入了股利與年終的 totalRecognizedIncome 計算 DTI
-            const dti = totalMonthlyDebt / totalRecognizedIncome;
-            const dtiPercentage = (dti * 100).toFixed(1);
+        <!-- Simulated Black Glass Control Panel -->
+        <div class="p-4 bg-gradient-to-b from-neutral-950 to-slate-950 border-b border-slate-800">
+          <div class="flex items-center justify-between text-[10px] text-slate-500 mb-2 px-1">
+            <span>👋 左感應區 (人體偵測 15-45cm)</span>
+            <span class="text-slate-400 font-semibold tracking-widest">SAKURA</span>
+            <span>👋 右感應區 (寬約 56cm)</span>
+          </div>
 
-            // 4. 判斷銀行評等與可貸成數
-            let grade = '';
-            let gradeDesc = '';
-            let ltv = '';
-            let gradeColorClass = '';
+          <!-- Central Smart Screen -->
+          <div class="bg-black border-2 border-slate-800 rounded-xl p-3 mb-3.5 shadow-inner">
+            <div class="flex items-center justify-between text-[11px] text-slate-400 border-b border-slate-900 pb-1.5 mb-2">
+              <span id="hood-screen-mode" class="text-sky-400 font-semibold">關機待機</span>
+              <span id="hood-screen-light" class="text-slate-500">💡 照明關閉</span>
+              <span id="hood-screen-timer" class="text-emerald-400 font-mono">--</span>
+            </div>
 
-            if (score < 500) {
-                // 信用極差，高機率拒貸
-                grade = 'D';
-                gradeDesc = '婉拒核貸';
-                ltv = '0%';
-                gradeColorClass = 'text-slate-600';
-            } else if (score < 600 || dti > 0.60) {
-                // 信用瑕疵或收支比過高
-                grade = 'C';
-                gradeDesc = '高風險客戶';
-                ltv = '60-70%';
-                gradeColorClass = 'text-red-600';
-            } else if (score >= 700 && dti < 0.45 && occupation === 'premium') {
-                // 完美條件
-                grade = 'A';
-                gradeDesc = '極優質客戶';
-                ltv = '80%';
-                gradeColorClass = 'text-green-600';
+            <div class="grid grid-cols-3 items-center text-center py-1 gap-2">
+              <!-- Left Stove Temp -->
+              <div class="bg-slate-950/90 rounded-lg p-2 border border-slate-900">
+                <div class="text-[10px] text-slate-400">左爐偵測溫度</div>
+                <div id="hood-left-temp" class="text-lg font-bold led-font text-slate-500 mt-0.5">-- °C</div>
+                <div id="hood-left-alert" class="text-[10px] text-slate-500 mt-0.5">無熱源</div>
+              </div>
+
+              <!-- Center Status / Speed -->
+              <div class="flex flex-col items-center justify-center">
+                <div id="hood-center-icon" class="text-xl mb-1">💤</div>
+                <div id="hood-speed-bars" class="flex items-center gap-1 text-[10px] font-bold">
+                  <span data-speed-pill="L" class="px-1.5 py-0.5 rounded bg-slate-900 text-slate-600">L低</span>
+                  <span data-speed-pill="M" class="px-1.5 py-0.5 rounded bg-slate-900 text-slate-600">M中</span>
+                  <span data-speed-pill="H" class="px-1.5 py-0.5 rounded bg-slate-900 text-slate-600">H高</span>
+                  <span data-speed-pill="T" class="px-1.5 py-0.5 rounded bg-slate-900 text-slate-600">TURBO</span>
+                </div>
+                <div id="hood-rpm-info" class="text-[10px] text-slate-400 mt-1">0 RPM ‧ 0W</div>
+              </div>
+
+              <!-- Right Stove Temp -->
+              <div class="bg-slate-950/90 rounded-lg p-2 border border-slate-900">
+                <div class="text-[10px] text-slate-400">右爐偵測溫度</div>
+                <div id="hood-right-temp" class="text-lg font-bold led-font text-slate-500 mt-0.5">-- °C</div>
+                <div id="hood-right-alert" class="text-[10px] text-slate-500 mt-0.5">無熱源</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 6 Touch Buttons Row -->
+          <div class="grid grid-cols-6 gap-1.5">
+            <button type="button" data-hood-btn="power" class="hood-touch-btn flex flex-col items-center justify-center py-2.5 px-1 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 transition">
+              <span class="text-base">⏻</span>
+              <span class="text-[11px] font-semibold mt-1">① 電源</span>
+              <span id="ind-hood-power" class="w-2 h-2 rounded-full bg-slate-700 mt-1"></span>
+            </button>
+            <button type="button" data-hood-btn="ai" class="hood-touch-btn flex flex-col items-center justify-center py-2.5 px-1 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 transition">
+              <span class="text-base font-bold text-sky-400">AI</span>
+              <span class="text-[11px] font-semibold mt-1">② AI智控</span>
+              <span id="ind-hood-ai" class="w-2 h-2 rounded-full bg-slate-700 mt-1"></span>
+            </button>
+            <button type="button" data-hood-btn="manual" class="hood-touch-btn flex flex-col items-center justify-center py-2.5 px-1 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 transition">
+              <span class="text-base">🌀</span>
+              <span class="text-[11px] font-semibold mt-1">③ 手動風速</span>
+              <span id="ind-hood-manual" class="w-2 h-2 rounded-full bg-slate-700 mt-1"></span>
+            </button>
+            <button type="button" data-hood-btn="deodorize" class="hood-touch-btn flex flex-col items-center justify-center py-2.5 px-1 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 transition">
+              <span class="text-base">🍃</span>
+              <span class="text-[11px] font-semibold mt-1">⑤ 靜音除味</span>
+              <span id="ind-hood-deodorize" class="w-2 h-2 rounded-full bg-slate-700 mt-1"></span>
+            </button>
+            <button type="button" data-hood-btn="light" class="hood-touch-btn flex flex-col items-center justify-center py-2.5 px-1 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 transition">
+              <span class="text-base">💡</span>
+              <span class="text-[11px] font-semibold mt-1">⑥ 照明 5W</span>
+              <span id="ind-hood-light" class="w-2 h-2 rounded-full bg-slate-700 mt-1"></span>
+            </button>
+            <button type="button" data-hood-btn="clean" class="hood-touch-btn flex flex-col items-center justify-center py-2.5 px-1 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 transition">
+              <span class="text-base">🔒</span>
+              <span class="text-[11px] font-semibold mt-1">⑦ 清潔(3秒)</span>
+              <span id="ind-hood-clean" class="w-2 h-2 rounded-full bg-slate-700 mt-1"></span>
+            </button>
+          </div>
+
+          <!-- AI Cooking Temperature Simulation Bar -->
+          <div class="mt-3 pt-3 border-t border-slate-800/80">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-xs font-semibold text-slate-300">🌡️ 模擬 AI 爐面溫度感測與語音嗶聲提示 (P.08)：</span>
+              <span id="hood-temp-beep-badge" class="text-[11px] text-amber-300 font-medium">點擊下方溫度測試</span>
+            </div>
+            <div class="grid grid-cols-5 gap-1.5">
+              <button type="button" data-sim-temp="60" class="sim-temp-btn py-1.5 px-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-[11px] text-slate-300">
+                60°C (低速)
+              </button>
+              <button type="button" data-sim-temp="120" class="sim-temp-btn py-1.5 px-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-[11px] text-emerald-300">
+                120°C 料理
+              </button>
+              <button type="button" data-sim-temp="200" class="sim-temp-btn py-1.5 px-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-[11px] text-amber-300">
+                200°C 高溫
+              </button>
+              <button type="button" data-sim-temp="250" class="sim-temp-btn py-1.5 px-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-[11px] text-rose-300">
+                250°C 警示
+              </button>
+              <button type="button" data-sim-temp="off" class="sim-temp-btn py-1.5 px-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-[11px] text-sky-300">
+                關火排餘味
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic Explanation Box for Hood -->
+        <div class="p-3.5 bg-slate-900/90 text-xs text-slate-300 space-y-1.5">
+          <div class="font-bold text-sky-300 flex items-center gap-1.5">
+            <span>📘 操作說明提示：</span>
+            <span id="hood-guide-title">按壓「① 電源鍵」啟動 24 小時 AI 待機偵測模式</span>
+          </div>
+          <p id="hood-guide-desc" class="text-slate-300 leading-relaxed">
+            關機模式下按電源鍵，啟動 AI 模式並進入 24 小時 AI 待機偵測模式；當偵測到爐面溫度變化及正前方感測區（15–45cm）有人時，除油煙機將自動啟動並打開照明燈，依料理溫度自動調節風量。
+          </p>
+        </div>
+      </div>
+
+      <!-- EG2351G IH Induction Cooker Interactive Simulator -->
+      <div data-device-box="ih" class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+        <div class="px-4 py-3 bg-slate-800/60 border-b border-slate-800 flex items-center justify-between">
+          <div>
+            <span class="text-[11px] px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 font-medium">EG2351G ‧ EG2501G ‧ EG2351XM</span>
+            <h3 class="text-sm font-bold text-white mt-1">櫻花雙口 IH 感應爐 觸控面板 & 3600W 功率模擬</h3>
+          </div>
+          <div class="text-right">
+            <span id="ih-total-watt-badge" class="text-xs px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">
+              總功率：0W / 3600W
+            </span>
+          </div>
+        </div>
+
+        <div class="p-4 bg-gradient-to-b from-neutral-950 to-slate-950 border-b border-slate-800 space-y-3">
+          <!-- Burner Selector (Left vs Right Burner) -->
+          <div class="flex items-center justify-between gap-2 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
+            <button type="button" data-ih-zone="left" class="ih-zone-tab flex-1 py-2 px-3 rounded-lg text-xs font-bold bg-rose-600 text-white flex items-center justify-between">
+              <span>🔥 左爐加熱區</span>
+              <span id="ih-left-summary" class="font-mono text-[11px] bg-black/30 px-2 py-0.5 rounded">關機</span>
+            </button>
+            <button type="button" data-ih-zone="right" class="ih-zone-tab flex-1 py-2 px-3 rounded-lg text-xs font-bold text-slate-400 hover:text-white flex items-center justify-between">
+              <span>🔥 右爐加熱區</span>
+              <span id="ih-right-summary" class="font-mono text-[11px] bg-black/30 px-2 py-0.5 rounded">關機</span>
+            </button>
+          </div>
+
+          <!-- IH LED Display Screen -->
+          <div class="bg-black border-2 border-slate-800 rounded-xl p-3.5 flex items-center justify-between shadow-inner">
+            <div class="space-y-1">
+              <div class="flex items-center gap-2">
+                <span id="ih- active-zone-label" class="text-xs font-bold text-rose-400">左爐控制面板</span>
+                <span id="ih-ai-link-badge" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-900 text-slate-500 border border-slate-800">AI連動：未啟動</span>
+              </div>
+              <div id="ih-status-badges" class="flex flex-wrap gap-1.5 text-[10px]">
+                <span id="ih-badge-lock" class="px-1.5 py-0.5 rounded bg-slate-900 text-slate-500">🔓 未鎖定</span>
+                <span id="ih-badge-pause" class="px-1.5 py-0.5 rounded bg-slate-900 text-slate-500">▶ 正常運作</span>
+                <span id="ih-badge-hot" class="px-1.5 py-0.5 rounded bg-slate-900 text-slate-500">面板常溫</span>
+              </div>
+            </div>
+
+            <!-- 7-Segment Red LED Display -->
+            <div class="text-right bg-neutral-950 px-4 py-2 rounded-lg border border-rose-950/60">
+              <div id="ih-led-display" class="text-2xl sm:text-3xl font-bold led-font text-rose-500 tracking-wider">OFF</div>
+              <div id="ih-watt-display" class="text-[11px] text-slate-400 font-mono mt-0.5">0 W ‧ 待機</div>
+            </div>
+          </div>
+
+          <!-- IH Touch Keys Grid -->
+          <div class="grid grid-cols-4 sm:grid-cols-5 gap-1.5">
+            <button type="button" data-ih-btn="power" class="ih-touch-btn py-2.5 px-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 flex flex-col items-center">
+              <span class="text-base">⏻</span>
+              <span class="text-[11px] font-semibold mt-0.5">電源開關</span>
+            </button>
+            <button type="button" data-ih-btn="minus" class="ih-touch-btn py-2.5 px-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 flex flex-col items-center">
+              <span class="text-base font-bold">－</span>
+              <span class="text-[11px] font-semibold mt-0.5">減小(預設4段)</span>
+            </button>
+            <button type="button" data-ih-btn="plus" class="ih-touch-btn py-2.5 px-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 flex flex-col items-center">
+              <span class="text-base font-bold">＋</span>
+              <span class="text-[11px] font-semibold mt-0.5">加大(預設1段)</span>
+            </button>
+            <button type="button" data-ih-btn="boost" class="ih-touch-btn py-2.5 px-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 flex flex-col items-center">
+              <span class="text-base">⚡</span>
+              <span class="text-[11px] font-semibold mt-0.5">快炒 b (3000W)</span>
+            </button>
+            <button type="button" data-ih-btn="fry" class="ih-touch-btn py-2.5 px-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 flex flex-col items-center">
+              <span class="text-base">🌡️</span>
+              <span class="text-[11px] font-semibold mt-0.5">定溫油炸</span>
+            </button>
+            <button type="button" data-ih-btn="soup" class="ih-touch-btn py-2.5 px-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 flex flex-col items-center">
+              <span class="text-base">🍲</span>
+              <span class="text-[11px] font-semibold mt-0.5">自動煲湯</span>
+            </button>
+            <button type="button" data-ih-btn="timer" class="ih-touch-btn py-2.5 px-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 flex flex-col items-center">
+              <span class="text-base">🕒</span>
+              <span class="text-[11px] font-semibold mt-0.5">定時(0:15起)</span>
+            </button>
+            <button type="button" data-ih-btn="pause" class="ih-touch-btn py-2.5 px-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 flex flex-col items-center">
+              <span class="text-base font-bold">||</span>
+              <span class="text-[11px] font-semibold mt-0.5">暫停(限10分)</span>
+            </button>
+            <button type="button" data-ih-btn="lock" class="ih-touch-btn py-2.5 px-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 flex flex-col items-center">
+              <span class="text-base">🔒</span>
+              <span class="text-[11px] font-semibold mt-0.5">兒童安全鎖</span>
+            </button>
+            <button type="button" data-ih-btn="potremove" class="ih-touch-btn py-2.5 px-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 flex flex-col items-center">
+              <span class="text-base text-amber-400">🍳</span>
+              <span class="text-[11px] font-semibold mt-0.5">模擬移開鍋具</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- IH Explanation Footer -->
+        <div class="p-3.5 bg-slate-900/90 text-xs text-slate-300 space-y-1.5">
+          <div class="font-bold text-rose-300 flex items-center gap-1.5">
+            <span>📘 IH 爐操作說明：</span>
+            <span id="ih-guide-title">按住「電源鍵」1秒開機，螢幕顯示 0</span>
+          </div>
+          <p id="ih-guide-desc" class="text-slate-300 leading-relaxed">
+            待機下按「+」從第1段（600W）開始；按「-」直接進入第4段（1600W）。啟動「快炒 b（3000W）」或「自動煲湯」時，另一爐受總功率 3600W 限制，最高僅能使用第1段（600W）。
+          </p>
+        </div>
+      </div>
+
+      <!-- Power Level Reference Table -->
+      <div data-device-box="ih" class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+        <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider mb-2.5">⚡ EG2351G 系列 烹調段數功率與定溫對照表 (P.05–07)</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left border-collapse">
+            <thead>
+              <tr class="border-b border-slate-800 text-slate-400">
+                <th class="py-1.5 px-2">段數</th>
+                <th class="py-1.5 px-2">1段</th>
+                <th class="py-1.5 px-2">2段</th>
+                <th class="py-1.5 px-2">3段</th>
+                <th class="py-1.5 px-2">4段</th>
+                <th class="py-1.5 px-2">5段</th>
+                <th class="py-1.5 px-2">6段</th>
+                <th class="py-1.5 px-2">7段</th>
+                <th class="py-1.5 px-2">8段</th>
+                <th class="py-1.5 px-2 text-rose-400">快炒 b</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60 font-mono">
+              <tr>
+                <td class="py-2 px-2 font-sans font-semibold text-slate-300">功率(W)</td>
+                <td class="py-2 px-2">600</td>
+                <td class="py-2 px-2">1000</td>
+                <td class="py-2 px-2">1400</td>
+                <td class="py-2 px-2">1600</td>
+                <td class="py-2 px-2">1800</td>
+                <td class="py-2 px-2">2000</td>
+                <td class="py-2 px-2">2200</td>
+                <td class="py-2 px-2">2400</td>
+                <td class="py-2 px-2 text-rose-400 font-bold">3000W</td>
+              </tr>
+              <tr>
+                <td class="py-2 px-2 font-sans font-semibold text-amber-300">定溫油炸</td>
+                <td class="py-2 px-2">60°C</td>
+                <td class="py-2 px-2">90°C</td>
+                <td class="py-2 px-2">120°C</td>
+                <td class="py-2 px-2">150°C</td>
+                <td class="py-2 px-2">180°C</td>
+                <td class="py-2 px-2">200°C</td>
+                <td class="py-2 px-2">220°C</td>
+                <td class="py-2 px-2">240°C</td>
+                <td class="py-2 px-2 font-sans text-slate-500">無</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="text-[11px] text-slate-400 mt-2">
+          ※ 定溫油炸油量應達 0.5L 以上，不建議使用複合底鍋具，請勿使用回鍋油。當一爐使用定溫功能，另一爐使用快炒功能時，定溫功能會被關閉。
+        </p>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2: 智慧連動與鍋具檢測 ==================== -->
+    <section id="tab-smart" class="tab-section hidden space-y-4">
+
+      <!-- Bluetooth IH-Hood Pairing Interactive Wizard -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+        <div class="flex items-start justify-between gap-2">
+          <div>
+            <span class="text-[11px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-semibold">Bluetooth 5.0 雙機連動</span>
+            <h2 class="text-base font-bold text-white mt-1">DR7397 除油煙機 × IH 感應爐 藍牙配對精靈</h2>
+            <p class="text-xs text-slate-400 mt-0.5">依據 DR7397 P.07 及 EG2351G P.04 連動步驟（註：EG9500G 無藍牙連動功能）</p>
+          </div>
+          <button id="btn-start-pairing-timer" type="button" class="shrink-0 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow transition">
+            ⏱️ 啟動 150秒配對計時
+          </button>
+        </div>
+
+        <!-- Timer Display Banner -->
+        <div id="pairing-timer-box" class="hidden bg-indigo-950/70 border border-indigo-500/40 rounded-xl p-3 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-indigo-400 animate-ping"></span>
+            <span class="text-xs font-semibold text-indigo-200">藍牙配對倒數中（最長 150 秒，期間請勿操作其他按鍵）</span>
+          </div>
+          <span id="pairing-timer-display" class="font-mono text-base font-bold text-white">150s</span>
+        </div>
+
+        <!-- Step-by-Step Interactive Cards -->
+        <div class="space-y-2">
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-start gap-3">
+            <span class="w-6 h-6 rounded-full bg-rose-600 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">1</span>
+            <div class="text-xs">
+              <div class="font-bold text-white">除油煙機進入配對確認頁面（圖1）</div>
+              <p class="text-slate-400 mt-0.5">在除油煙機<strong>關機狀態</strong>下，長按面板「<strong>③ 手動鍵 🌀</strong>」3 秒，螢幕顯示「<strong>請按 AI 鍵開始配對</strong>」。</p>
+            </div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-start gap-3">
+            <span class="w-6 h-6 rounded-full bg-rose-600 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
+            <div class="text-xs">
+              <div class="font-bold text-white">啟動除油煙機配對（圖2）</div>
+              <p class="text-slate-400 mt-0.5">按壓除油煙機面板上之「<strong>② AI 鍵</strong>」，螢幕顯示「<strong>配對中，IH爐須同步啟動配對</strong>」。</p>
+            </div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-start gap-3">
+            <span class="w-6 h-6 rounded-full bg-rose-600 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
+            <div class="text-xs">
+              <div class="font-bold text-white">同步啟動 IH 感應爐配對</div>
+              <p class="text-slate-400 mt-0.5">於 IH 感應爐<strong>待機狀態</strong>下，長按左上方「<strong>油煙機連動鍵</strong>」3 秒，發出一短聲，圖示「<strong>AI連動</strong>」閃爍進行連線。</p>
+            </div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-start gap-3">
+            <span class="w-6 h-6 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">4</span>
+            <div class="text-xs">
+              <div class="font-bold text-emerald-300">配對完成與自動連動運作（圖3）</div>
+              <p class="text-slate-400 mt-0.5">配對成功後，除油煙機顯示「<strong>配對完成</strong>」10秒後回關機狀態，IH爐「AI連動」圖示恆亮。之後<strong>按壓除油煙機電源鍵進入 AI 待機模式</strong>，開啟 IH 爐時油煙機即自動啟動；關閉 IH 爐後，油煙機以<strong>低速倒數 2 分鐘</strong>再進入靜音除味流程！</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DR7397 First-Time Stove Positioning Guide -->
+      <div data-device-box="hood" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+        <span class="text-[11px] px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 font-semibold">DR7397 初次送電必做 (P.06)</span>
+        <h3 class="text-base font-bold text-white">🎯 初次送電開機「爐頭定位設定」與重置教學</h3>
+        <p class="text-xs text-slate-400">定位前請務必確保爐面為<strong>冷卻狀態</strong>（適用 A、B 爐頭水平中心距 50cm 以內）。定位完成後即使拔除電源重插也會記憶，無須重新定位。</p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
+            <div class="font-bold text-rose-400 mb-1">🔥 搭配櫻花 IH 爐定位</div>
+            <p class="text-slate-300 leading-relaxed">長按除油煙機面板「<strong>AI 鍵 3 秒</strong>」進行定位 → 畫面顯示「定位完成」進入「AI偵測中」，3 秒後畫面熄滅進入預設 AI 待機模式。</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
+            <div class="font-bold text-amber-400 mb-1">🔥 搭配二口/三口瓦斯爐</div>
+            <p class="text-slate-300 leading-relaxed">按電源鍵開機顯示「定位設定」→ 在<strong>無置鍋狀態</strong>下將兩側外圍 A、B 爐火開至<strong>最大火</strong>以便定位。（三口爐內側小爐建議用直徑&lt;22cm、高&lt;11cm鍋具）</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
+            <div class="font-bold text-sky-400 mb-1">🔄 重置定位設定（換爐具時）</div>
+            <p class="text-slate-300 leading-relaxed">於待機狀態下長按「<strong>AI 鍵 3 秒</strong>」進入定位重置頁面 → 按壓「<strong>手動鍵 🌀</strong>」重置 → 顯示重置完成後，按「<strong>電源鍵 ⏻</strong>」重新定位。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- IH Cookware Compatibility & Efficiency Diagnostic Tool -->
+      <div data-device-box="ih" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3.5">
+        <div>
+          <span class="text-[11px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold">EG2351G 鍋具檢測器 (P.04 & P.08–09)</span>
+          <h3 class="text-base font-bold text-white mt-1">🍳 IH 感應爐 鍋具相容性與加熱效率模擬器</h3>
+          <p class="text-xs text-slate-400 mt-0.5">選擇您手邊的鍋具條件，立即查看鍋具效率燈條（2格 / 4–6格 / 8格）與支援的烹調模式</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+          <div>
+            <label for="select-pot-material" class="block text-slate-400 font-medium mb-1">1. 鍋具材質</label>
+            <select id="select-pot-material" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white">
+              <option value="iron">鐵鍋 / 鑄鐵鍋 / 單層導磁不鏽鋼</option>
+              <option value="clad_ss">複合底：不鏽鋼多層鍋 / 不沾鍋</option>
+              <option value="clad_al">複合底：鋁 + 底部導磁片</option>
+              <option value="non_mag">純鋁 / 純銅 / 耐熱玻璃 / 陶瓷 / 陶鍋</option>
+            </select>
+          </div>
+          <div>
+            <label for="select-pot-size" class="block text-slate-400 font-medium mb-1">2. 鍋底導磁區直徑</label>
+            <select id="select-pot-size" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white">
+              <option value="good">150 mm ～ 220 mm (標準理想尺寸)</option>
+              <option value="mid">120 mm ～ 149 mm (僅適合整面導磁鍋)</option>
+              <option value="small">小於 120 mm (過小)</option>
+              <option value="oversize">240 mm 以上大鍋 (EG2501/9500限擺單口)</option>
+            </select>
+          </div>
+          <div>
+            <label for="select-pot-base" class="block text-slate-400 font-medium mb-1">3. 鍋底形狀與厚度</label>
+            <select id="select-pot-base" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white">
+              <option value="flat">平坦無凹凸平底鍋 (厚度 ≥ 1mm)</option>
+              <option value="thin">鍋底過薄 (厚度 &lt; 1mm)</option>
+              <option value="curved">凹陷深度過大 / 弧形鍋底 / 有腳座</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Cookware Result Card -->
+        <div id="pot-check-result" class="p-3.5 rounded-xl bg-slate-950 border border-emerald-500/40 space-y-2">
+          <div class="flex items-center justify-between">
+            <span id="pot-grade-title" class="text-sm font-bold text-emerald-400">✅ 鍋具效率：優（燈條顯示 8 格）</span>
+            <span id="pot-bars-visual" class="font-mono text-xs text-emerald-400 bg-emerald-950/60 px-2 py-1 rounded border border-emerald-700/50">■■■■■■■■ 8/8格</span>
+          </div>
+          <p id="pot-grade-desc" class="text-xs text-slate-300">
+            導磁效率最佳！可完整支援「定溫油炸功能」、「自動煲湯功能」及「一般煎炒料理」。
+          </p>
+          <div id="pot-mode-pills" class="flex flex-wrap gap-2 pt-1 text-[11px]">
+            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">⭕ 煎炒料理</span>
+            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">⭕ 自動煲湯</span>
+            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">⭕ 定溫油炸</span>
+          </div>
+        </div>
+
+        <div class="text-[11px] text-slate-400 bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+          💡 <strong>實機鍋具效率偵測操作法 (P.04)：</strong>於 IH 爐待機狀態下，鍋具需<strong>加水測試</strong>並置中於加熱區（另一爐須處於關機狀態），按一下「鍋具效率偵測鍵」，螢幕閃爍 <code class="text-rose-400">---</code>，完畢後發出一長聲並以燈條顯示 2格、4格、6格或 8格（2格代表不可使用）。
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: 故障排除與異音診斷 ==================== -->
+    <section id="tab-trouble" class="tab-section hidden space-y-4">
+
+      <!-- Interactive Error Code Quick Selector (IH Cooker) -->
+      <div data-device-box="ih" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+        <div>
+          <span class="text-[11px] px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 font-semibold">EG2351G 故障碼診斷 (P.15)</span>
+          <h2 class="text-base font-bold text-white mt-1">🚨 IH 感應爐 螢幕代碼點擊快查</h2>
+          <p class="text-xs text-slate-400 mt-0.5">點擊面板出現的閃爍代碼或現象，立即查看原因與排除方式</p>
+        </div>
+
+        <div class="grid grid-cols-5 sm:grid-cols-9 gap-1.5">
+          <button type="button" data-err-code="E1E2" class="err-code-btn py-2 px-1 rounded-xl bg-rose-600 text-white font-mono text-xs font-bold border border-rose-400 shadow">E1/E2</button>
+          <button type="button" data-err-code="E3" class="err-code-btn py-2 px-1 rounded-xl bg-slate-950 hover:bg-slate-800 text-rose-400 font-mono text-xs font-bold border border-slate-800">E3</button>
+          <button type="button" data-err-code="E4" class="err-code-btn py-2 px-1 rounded-xl bg-slate-950 hover:bg-slate-800 text-rose-400 font-mono text-xs font-bold border border-slate-800">E4</button>
+          <button type="button" data-err-code="E5" class="err-code-btn py-2 px-1 rounded-xl bg-slate-950 hover:bg-slate-800 text-rose-400 font-mono text-xs font-bold border border-slate-800">E5</button>
+          <button type="button" data-err-code="E6" class="err-code-btn py-2 px-1 rounded-xl bg-slate-950 hover:bg-slate-800 text-rose-400 font-mono text-xs font-bold border border-slate-800">E6</button>
+          <button type="button" data-err-code="E7" class="err-code-btn py-2 px-1 rounded-xl bg-slate-950 hover:bg-slate-800 text-rose-400 font-mono text-xs font-bold border border-slate-800">E7</button>
+          <button type="button" data-err-code="U" class="err-code-btn py-2 px-1 rounded-xl bg-slate-950 hover:bg-slate-800 text-amber-400 font-mono text-xs font-bold border border-slate-800">U 閃爍</button>
+          <button type="button" data-err-code="HOT" class="err-code-btn py-2 px-1 rounded-xl bg-slate-950 hover:bg-slate-800 text-amber-400 font-mono text-xs font-bold border border-slate-800">♨ 符號</button>
+          <button type="button" data-err-code="FAN" class="err-code-btn py-2 px-1 rounded-xl bg-slate-950 hover:bg-slate-800 text-sky-400 font-sans text-[11px] font-bold border border-slate-800">風扇轉</button>
+        </div>
+
+        <div id="err-detail-card" class="p-4 rounded-xl bg-slate-950 border border-rose-500/40 space-y-2">
+          <div class="flex items-center justify-between">
+            <span id="err-card-code" class="text-sm font-bold text-rose-400 font-mono">代碼 E1 或 E2：供電電壓異常</span>
+            <span id="err-card-tag" class="text-[11px] px-2 py-0.5 rounded bg-rose-500/20 text-rose-300">電力檢查</span>
+          </div>
+          <div class="text-xs space-y-1.5">
+            <p><strong class="text-slate-300">可能原因：</strong><span id="err-card-cause" class="text-slate-400">供電電壓過低或過高（本機額定電壓為 220V / 60Hz）。</span></p>
+            <p><strong class="text-emerald-400">解決方式：</strong><span id="err-card-fix" class="text-slate-200">請先確認家中 220V 供電是否正常；若供電正常爐具卻無法正常動作，請與櫻花客服中心聯絡（0800-021-818）。</span></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- DR7397 Range Hood Troubleshooting -->
+      <div data-device-box="hood" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+        <div>
+          <span class="text-[11px] px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 font-semibold">DR7397 異常狀況處理 (P.12)</span>
+          <h3 class="text-base font-bold text-white mt-1">🌀 除油煙機 故障圖示與異常排除</h3>
+          <p class="text-xs text-slate-400 mt-0.5">使用中發現異常狀況時，請先關閉油煙機並移除電源</p>
+        </div>
+
+        <div class="space-y-2.5 text-xs">
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
+            <div class="font-bold text-rose-400">① 馬達異常故障提醒 / 通訊異常故障提醒（螢幕紅圖示，自動關機）</div>
+            <p class="text-slate-300 mt-1">
+              <strong>排除步驟：</strong>A. 拔除電源 → B. 檢查馬達相位迴授線材是否有斷掉或短路 / 轉動風扇查看有無卡死狀態 → C. 若無卡死，重新送電運轉 → D. 若狀況排除後仍出現異常，請洽櫻花維修人員（0800-021-818）。
+            </p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
+            <div class="font-bold text-amber-400">② 風控感測器 故障提醒（螢幕顯示感測器警告圖示）</div>
+            <p class="text-slate-300 mt-1">
+              <strong>排除步驟：</strong>1. 請先依畫面指示<strong>切換為「手動風控模式（按③手動鍵）」</strong>繼續排煙使用 → 2. 檢查開關訊號線及感測器接線是否脫落或損壞 → 3. 重新送電運轉，若未排除請洽客服人員。
+            </p>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
+              <div class="font-bold text-sky-300">③ 機體震動</div>
+              <p class="text-slate-400 mt-1">1. 查看馬達是否鎖緊。<br>2. 如馬達已鎖緊，則是風葉受損，不平穩轉動時會產生震動，應更換風葉。</p>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
+              <div class="font-bold text-sky-300">④ 吸力不強</div>
+              <p class="text-slate-400 mt-1">1. 除油煙機與爐面距離太高（建議 65–70cm）或周圍門窗風多對流太大。<br>2. 裝在窗戶處建議在後下方放三角板遮窗戶凹處。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- IH Normal Operating Sounds Guide -->
+      <div data-device-box="ih" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2.5">
+        <span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">EG2351G 聲音判別 (P.10 & P.15)</span>
+        <h3 class="text-sm font-bold text-white">🔊 IH 感應爐常見運作聲音說明（非故障現象）</h3>
+        <p class="text-xs text-slate-400">依據不同鍋底材質、厚度及結構，加熱時會產生以下正常電磁感應聲音，無安全危害（降低火力段數或改用單一材質鐵鍋/鑄鐵鍋可減少噪音）：</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+          <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+            <strong class="text-white">‧ 低鳴聲：</strong><span class="text-slate-400">發生於大火力加熱時，調小火力後變小或消失。</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+            <strong class="text-white">‧ 低沉哨音：</strong><span class="text-slate-400">發生於空鍋加熱時，加入水或食物後將會消失。</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+            <strong class="text-white">‧ 尖銳哨聲：</strong><span class="text-slate-400">兩爐口同時使用大火力加熱時產生，調小火力即減輕。</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+            <strong class="text-white">‧ 噠噠聲 / 劈啪聲：</strong><span class="text-slate-400">開始感應鍋具時（確認後消失）或多層材質鍋具受熱聲。</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: 清潔保養與 SAKURA iCare ==================== -->
+    <section id="tab-care" class="tab-section hidden space-y-4">
+
+      <!-- Interactive Maintenance Tracker (Saved in LocalStorage) -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">手機本機記憶</span>
+            <h2 class="text-base font-bold text-white mt-1">🗓️ 居家清潔保養打卡追蹤器</h2>
+            <p class="text-xs text-slate-400">點擊「完成打卡」記錄上次清潔日期（自動儲存於您的安卓手機瀏覽器中）</p>
+          </div>
+          <button id="btn-reset-care-log" type="button" class="text-xs text-slate-400 hover:text-rose-400 underline">清除紀錄</button>
+        </div>
+
+        <div id="care-tracker-list" class="space-y-2 text-xs">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- DR7397 Filter Replacement 4-Step Guide -->
+      <div data-device-box="hood" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+        <span class="text-[11px] px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 font-semibold">DR7397 清潔保養 (P.11)</span>
+        <h3 class="text-base font-bold text-white">🧽 除油煙機 濾網架拆卸與油網更換 4 步驟</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
+            <div class="font-bold text-sky-400">步驟 1：啟動清潔鎖定 & 取下油杯</div>
+            <p class="text-slate-300 mt-1">於電源鍵關閉時，長按「<strong>⑦ 清潔鍵 🔒 3 秒</strong>」啟動清潔鎖定模式，等待入風口下降至定位，使用<strong>雙手往前取下長油杯</strong>（圖1）。（30分鐘無動作會自動解鎖但入風口不收回；再長按3秒清潔鍵可收回入風口）</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
+            <div class="font-bold text-sky-400">步驟 2：依序取下兩片濾網架</div>
+            <p class="text-slate-300 mt-1">手持紙巾先將其中一片濾網架取下，再取下另一片濾網架（圖2、圖3）。請勿用硬質絨菜瓜布或強酸強鹼清潔劑，建議用中性洗碗精、洗衣粉或肥皂粉清洗。</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
+            <div class="font-bold text-sky-400">步驟 3：更換新濾油網（缺口在左右）</div>
+            <p class="text-slate-300 mt-1">將髒污油網取下後更換新油網，注意<strong>油網缺口在左右兩側</strong>（圖4）。建議<strong>至少每 4 個月更換一次</strong>，重度使用者請提早更換。</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
+            <div class="font-bold text-sky-400">步驟 4：裝回濾網架與油杯</div>
+            <p class="text-slate-300 mt-1">依拆卸動作反向回復裝回濾網架與長油杯，再長按清潔鍵 3 秒收回入風口。四周吸入口殘留油漬為強大吸力正常現象，煮食後隨手擦拭即可。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- IH Glass Panel Cleaning Guide -->
+      <div data-device-box="ih" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2.5">
+        <span class="text-[11px] px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 font-semibold">EG2351G 微晶玻璃保養 (P.14)</span>
+        <h3 class="text-sm font-bold text-white">✨ IH 感應爐 玻璃面板污漬清潔對策</h3>
+        <p class="text-xs text-amber-300">⚠️ 請務必等高溫警示燈「♨」熄滅（低於 40°C）後再進行清潔！請勿用水直接沖洗機體或使用蒸氣清潔器。</p>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left border-collapse">
+            <thead>
+              <tr class="border-b border-slate-800 text-slate-400">
+                <th class="py-2 px-2">污漬種類</th>
+                <th class="py-2 px-2">清潔方法</th>
+                <th class="py-2 px-2">使用工具</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60">
+              <tr>
+                <td class="py-2 px-2 font-semibold text-white">少量污漬 / 積聚燃燒污漬</td>
+                <td class="py-2 px-2 text-slate-300">用熱水完全濕透要清潔的區域，然後擦拭乾淨</td>
+                <td class="py-2 px-2 text-slate-300">清潔用軟布或海綿</td>
+              </tr>
+              <tr>
+                <td class="py-2 px-2 font-semibold text-rose-300">頑固污漬</td>
+                <td class="py-2 px-2 text-slate-300">用熱的白醋倒在污漬處，讓其作用後用軟布擦拭</td>
+                <td class="py-2 px-2 text-slate-300">白醋或專用清潔膏</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SAKURA iCare & My Warranty Card -->
+      <div class="bg-gradient-to-br from-slate-900 to-rose-950/40 border border-rose-500/30 rounded-2xl p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <span class="text-xs font-bold text-rose-400 tracking-wider">SAKURA iCare 永久承諾</span>
+            <h3 class="text-base font-bold text-white">🎁 五大免費服務 & 永久免費油網送到家</h3>
+          </div>
+          <a href="tel:0800021818" class="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow">
+            📞 撥打 0800-021-818
+          </a>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+          <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
+            <strong class="text-rose-300">● 永久免費油網送到家：</strong>
+            <p class="text-slate-300 mt-0.5">第1年：安裝後掃描機身 QR code 或至官網登錄即寄送一年份油網。<br>第2～4年：每年固定於登錄月份寄送一年份。<br>第5年起：透過 LINE、簡訊或撥打 0800-021-818 告知需求即持續寄送。</p>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1 text-slate-300">
+            <div><strong class="text-rose-300">● 永久免費廚房健檢：</strong>每年 5 月免費報名</div>
+            <div><strong class="text-rose-300">● 永久免費淨水器健檢：</strong>每年 6～8 月免費報名</div>
+            <div><strong class="text-rose-300">● 永久免費送安檢：</strong>每年 9～11 月熱水器安全檢查</div>
+            <div><strong class="text-rose-300">● 永久免費空間健檢：</strong>每年免費報名門板/五金檢查</div>
+          </div>
+        </div>
+
+        <!-- Digital Warranty Card Memo -->
+        <div class="pt-2 border-t border-slate-800/80 space-y-2">
+          <div class="text-xs font-bold text-white">📝 我的數位保證卡備忘錄（自動儲存於本機）</div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+            <input id="warranty-date" type="date" class="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white" title="安裝日期" />
+            <input id="warranty-hood-sn" type="text" placeholder="除油煙機製造號碼 / 備註" class="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white" />
+            <input id="warranty-ih-sn" type="text" placeholder="IH感應爐製造號碼 / 經銷商" class="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white" />
+          </div>
+          <button id="btn-save-warranty" type="button" class="w-full sm:w-auto px-4 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-300 text-xs font-semibold border border-slate-700">
+            💾 儲存保固資訊至手機
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 5: 產品規格與安裝尺寸計算 ==================== -->
+    <section id="tab-specs" class="tab-section hidden space-y-4">
+
+      <!-- Exhaust Duct Equivalent Length Calculator (DR7397 P.03) -->
+      <div data-device-box="hood" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+        <span class="text-[11px] px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 font-semibold">DR7397 安裝原則第5項 (P.03)</span>
+        <h2 class="text-base font-bold text-white">📏 排煙管標準安裝長度換算器（上限 10 米）</h2>
+        <p class="text-xs text-slate-400">90° 彎頭相當於直管 3 米計算；45° 彎頭相當於直管 2 米計算。超過 10 米請加裝中繼風機。</p>
+
+        <div class="grid grid-cols-3 gap-2.5 text-xs">
+          <div>
+            <label for="duct-straight" class="block text-slate-400 mb-1">鋁風管直線總長 (米)</label>
+            <input id="duct-straight" type="number" min="0" max="20" step="0.5" value="2" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
+          </div>
+          <div>
+            <label for="duct-elbow90" class="block text-slate-400 mb-1">90° 彎頭數量 (×3m)</label>
+            <input id="duct-elbow90" type="number" min="0" max="10" step="1" value="1" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
+          </div>
+          <div>
+            <label for="duct-elbow45" class="block text-slate-400 mb-1">45° 彎頭數量 (×2m)</label>
+            <input id="duct-elbow45" type="number" min="0" max="10" step="1" value="0" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
+          </div>
+        </div>
+
+        <div id="duct-calc-result" class="p-3 rounded-xl bg-slate-950 border border-emerald-500/40 flex items-center justify-between text-xs">
+          <span>等效排煙管總長度：<strong id="duct-total-m" class="text-emerald-400 font-mono text-sm">5.0 米</strong>（上限 10 米）</span>
+          <span id="duct-status-badge" class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-semibold">✅ 符合標準無須中繼風機</span>
+        </div>
+      </div>
+
+      <!-- DR7397 Full Specification Table -->
+      <div data-device-box="hood" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2.5">
+        <h3 class="text-sm font-bold text-white">🌀 櫻花除油煙機 DR7397L/XL ‧ DR9397L/XL 產品規格表 (P.01 & P.14)</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left border-collapse">
+            <tbody class="divide-y divide-slate-800/70">
+              <tr>
+                <th class="py-2 px-2 text-slate-400 w-1/3">機體尺寸 (W×D×H)</th>
+                <td class="py-2 px-2 text-white font-mono">790 / 890 × 366 × 546 mm (含風管座高 721mm)</td>
+              </tr>
+              <tr>
+                <th class="py-2 px-2 text-slate-400">適用廚櫃 / 安裝高度</th>
+                <td class="py-2 px-2 text-white">800 / 900 mm 廚櫃；爐面至機體前緣距離 <strong>650–700 mm</strong></td>
+              </tr>
+              <tr>
+                <th class="py-2 px-2 text-slate-400">淨重 / 牆面耐重</th>
+                <td class="py-2 px-2 text-white">20 kg (L) / 24 kg (XL)；實心牆面耐重需至少 35 kg 以上</td>
+              </tr>
+              <tr>
+                <th class="py-2 px-2 text-slate-400">額定電壓 / 馬達 / 照明</th>
+                <td class="py-2 px-2 text-white">110V~ 60Hz (3P接地插頭) ‧ DC直流變頻單馬達 ‧ LED燈 5W</td>
+              </tr>
+              <tr>
+                <th class="py-2 px-2 text-slate-400">出風口徑 / 排煙鋁風管</th>
+                <td class="py-2 px-2 text-white">出風口徑 Ø150mm ‧ 附件鋁風管公稱 5.5 吋 (Ø140–145mm)</td>
+              </tr>
+              <tr>
+                <th class="py-2 px-2 text-slate-400">五段轉速 (R.P.M)</th>
+                <td class="py-2 px-2 text-white font-mono">Turbo: 2150 / 高: 1950 / 中: 1700 / 低: 1400 / 微速(除味): 550</td>
+              </tr>
+              <tr>
+                <th class="py-2 px-2 text-slate-400">五段風量 (m³/min)</th>
+                <td class="py-2 px-2 text-white font-mono">Turbo: 16 / 高: 15 / 中: 12.5 / 低: 10 / 微速(除味): 4</td>
+              </tr>
+              <tr>
+                <th class="py-2 px-2 text-slate-400">消耗功率 (W) / 無線</th>
+                <td class="py-2 px-2 text-white font-mono">Turbo: 230W / 高: 190W / 中: 120W / 低: 70W / 微: 15W ‧ Bluetooth 5.0</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- EG2351G Series Full Specification Table -->
+      <div data-device-box="ih" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2.5">
+        <h3 class="text-sm font-bold text-white">🔥 櫻花雙口 IH 感應爐 全系列規格與挖孔尺寸表 (P.01 & P.12)</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left border-collapse">
+            <thead>
+              <tr class="border-b border-slate-800 text-slate-400">
+                <th class="py-2 px-2">型號系列</th>
+                <th class="py-2 px-2">外型尺寸 (寬×深×高)</th>
+                <th class="py-2 px-2">流理檯挖孔尺寸 (孔深&gt;150mm)</th>
+                <th class="py-2 px-2">藍牙連動</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/70 font-mono">
+              <tr>
+                <td class="py-2 px-2 text-rose-300 font-bold">EG2351G / EG9351G</td>
+                <td class="py-2 px-2">735 × 435 × 80 mm</td>
+                <td class="py-2 px-2 text-emerald-300">680 × 410 mm (邊距&gt;50/後&gt;100)</td>
+                <td class="py-2 px-2 font-sans">Bluetooth 5.0</td>
+              </tr>
+              <tr>
+                <td class="py-2 px-2 text-rose-300 font-bold">EG2501G / EG2501GC</td>
+                <td class="py-2 px-2">550 × 510 × 80 mm</td>
+                <td class="py-2 px-2 text-emerald-300">516 × 480 mm (邊距&gt;40/後&gt;30)</td>
+                <td class="py-2 px-2 font-sans">Bluetooth 5.0</td>
+              </tr>
+              <tr>
+                <td class="py-2 px-2 text-slate-300 font-bold">EG9500G</td>
+                <td class="py-2 px-2">550 × 510 × 80 mm</td>
+                <td class="py-2 px-2 text-emerald-300">516 × 480 mm (邊距&gt;40/後&gt;30)</td>
+                <td class="py-2 px-2 font-sans text-slate-500">無 (N/A)</td>
+              </tr>
+              <tr>
+                <td class="py-2 px-2 text-rose-300 font-bold">EG2351XM / XG / XGB<br>EG9351XM / XG / XGB</td>
+                <td class="py-2 px-2">775 × 500 × 80 mm</td>
+                <td class="py-2 px-2 text-emerald-300">728 × 468 mm (R113圓角)</td>
+                <td class="py-2 px-2 font-sans">Bluetooth 5.0</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="text-[11px] text-slate-400 space-y-1 pt-1">
+          <p>‧ <strong>電力需求：</strong>全系列皆為 220V / 60Hz，額定功率 3600W / 16.4A，T型插頭 / 線徑 2.0 mm²（須由合格電工從配電箱配置單獨專用迴路）。</p>
+          <p>‧ <strong>安裝安全：</strong>面板限重不可超過 18kg；開機加熱 2 小時內無任何操作將自動關機；底部防水膠條貼好後放入開孔，<strong>切勿使用矽利康 (Silicone) 封膠</strong>，並確保入氣口與出氣口通風不被堵塞。</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Android Navigation Bar -->
+  <nav class="fixed bottom-0 left-0 right-0 z-30 bg-slate-900/95 backdrop-blur border-t border-slate-800 px-2 py-1.5 shadow-2xl">
+    <div class="max-w-2xl mx-auto grid grid-cols-5 gap-1">
+      <button type="button" data-nav-target="tab-panel" class="nav-tab-btn flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-rose-400 bg-rose-500/10 font-semibold transition">
+        <span class="text-base">🎛️</span>
+        <span class="text-[11px] mt-0.5">互動面板</span>
+      </button>
+      <button type="button" data-nav-target="tab-smart" class="nav-tab-btn flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-slate-400 hover:text-slate-200 font-medium transition">
+        <span class="text-base">🔗</span>
+        <span class="text-[11px] mt-0.5">連動與鍋具</span>
+      </button>
+      <button type="button" data-nav-target="tab-trouble" class="nav-tab-btn flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-slate-400 hover:text-slate-200 font-medium transition">
+        <span class="text-base">🛠️</span>
+        <span class="text-[11px] mt-0.5">故障碼排除</span>
+      </button>
+      <button type="button" data-nav-target="tab-care" class="nav-tab-btn flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-slate-400 hover:text-slate-200 font-medium transition">
+        <span class="text-base">🧽</span>
+        <span class="text-[11px] mt-0.5">保養iCare</span>
+      </button>
+      <button type="button" data-nav-target="tab-specs" class="nav-tab-btn flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-slate-400 hover:text-slate-200 font-medium transition">
+        <span class="text-base">📐</span>
+        <span class="text-[11px] mt-0.5">規格安裝</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ==================== MODAL 1: 全域說明書快速搜尋 ==================== -->
+  <div id="modal-search" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-start justify-center p-3 pt-12">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl">
+      <div class="p-3 border-b border-slate-800 flex items-center gap-2">
+        <svg class="w-4 h-4 text-rose-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M16.65 10.825a5.825 5.825 0 11-11.65 0 5.825 5.825 0 0111.65 0z"/></svg>
+        <input id="search-input" type="text" placeholder="搜尋關鍵字：如 配對、E3、油網、定位、定溫、尺寸..." class="w-full bg-transparent text-sm text-white focus:outline-none" />
+        <button id="btn-close-search" type="button" class="px-2 py-1 rounded-lg bg-slate-800 text-slate-300 text-xs">關閉</button>
+      </div>
+      <div id="search-results" class="max-h-80 overflow-y-auto p-3 space-y-2 text-xs">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 2: 安卓手機安裝教學 (Add to Home Screen) ==================== -->
+  <div id="modal-install" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <span>📲</span>
+          <span>如何在 Android 手機安裝成 App？</span>
+        </h3>
+        <button id="btn-close-install" type="button" class="text-slate-400 hover:text-white text-sm">✕</button>
+      </div>
+      <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+        <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
+          <div class="font-bold text-rose-400 mb-1">方式一：Chrome「加到主畫面」全螢幕 Web App（推薦免封裝）</div>
+          <ol class="list-decimal list-inside space-y-1 text-slate-300">
+            <li>下載本頁 <code class="text-rose-300">sakura_kitchen_app.html</code> 檔案至您的安卓手機，或透過雲端硬碟連結在 <strong>Chrome 瀏覽器</strong>開啟。</li>
+            <li>點選 Chrome 右上角「<strong>⋮（更多選單）</strong>」。</li>
+            <li>點選「<strong>加到主畫面 (Add to Home screen)</strong>」。</li>
+            <li>桌面即會產生「<strong>櫻花廚電助手</strong>」App 圖示，點擊即可全螢幕離線使用！</li>
+          </ol>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
+          <div class="font-bold text-sky-400 mb-1">方式二：轉換為原生 APK 安裝包</div>
+          <p class="text-slate-400">
+            本檔案採用單一檔案離線架構（Single-File HTML5 WebView Ready），可直接放入 Android Studio 的 <code class="text-sky-300">app/src/main/assets/index.html</code> 透過 <code class="text-sky-300">WebView</code> 打包成獨立 <code class="text-sky-300">.apk</code>。
+          </p>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-1">
+        <button id="btn-copy-hotline" type="button" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium">
+          複製櫻花客服電話 0800-021-818
+        </button>
+        <button id="btn-ok-install" type="button" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold">
+          我知道了
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast-box" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 hidden px-4 py-2 rounded-full bg-emerald-600 text-white text-xs font-bold shadow-lg">
+    已更新狀態
+  </div>
+
+  <script>
+    (function() {
+      // --- Helper: Toast ---
+      var toastTimeout = null;
+      function showToast(msg) {
+        var box = document.getElementById('toast-box');
+        if (!box) return;
+        box.textContent = msg;
+        box.classList.remove('hidden');
+        if (toastTimeout) clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(function() {
+          box.classList.add('hidden');
+        }, 2400);
+      }
+
+      // --- Tab Navigation ---
+      var navBtns = document.querySelectorAll('.nav-tab-btn');
+      var tabSections = document.querySelectorAll('.tab-section');
+      function switchTab(targetId) {
+        tabSections.forEach(function(sec) {
+          if (sec.id === targetId) {
+            sec.classList.remove('hidden');
+          } else {
+            sec.classList.add('hidden');
+          }
+        });
+        navBtns.forEach(function(btn) {
+          var isMatch = btn.getAttribute('data-nav-target') === targetId;
+          if (isMatch) {
+            btn.className = 'nav-tab-btn flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-rose-400 bg-rose-500/10 font-semibold transition';
+          } else {
+            btn.className = 'nav-tab-btn flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-slate-400 hover:text-slate-200 font-medium transition';
+          }
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      navBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          switchTab(btn.getAttribute('data-nav-target'));
+        });
+      });
+
+      // --- Global Device Filter (All / Hood / IH) ---
+      var filterBtns = document.querySelectorAll('.device-filter-btn');
+      filterBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var mode = btn.getAttribute('data-device-filter');
+          filterBtns.forEach(function(b) {
+            if (b === btn) {
+              b.className = 'device-filter-btn flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold transition bg-rose-600 text-white shadow';
             } else {
-                // 一般正常客戶 (分數 600-699 或 DTI 45-60% 或 條件好但職業一般)
-                grade = 'B';
-                gradeDesc = '一般良好客戶';
-                ltv = '75%';
-                gradeColorClass = 'text-blue-600';
+              b.className = 'device-filter-btn flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-white';
             }
-
-            // 5. 更新 UI 介面
-            document.getElementById('emptyState').classList.add('hidden');
-            const resultState = document.getElementById('resultState');
-            resultState.classList.remove('hidden');
-            
-            // 重新觸發動畫
-            resultState.classList.remove('fade-in');
-            void resultState.offsetWidth; // trigger reflow
-            resultState.classList.add('fade-in');
-
-            // 填寫基本數據
-            const resGradeEl = document.getElementById('resGrade');
-            resGradeEl.textContent = grade;
-            resGradeEl.className = `text-4xl font-black my-1 ${gradeColorClass}`;
-            document.getElementById('resGradeDesc').textContent = gradeDesc;
-            document.getElementById('resLTV').textContent = ltv;
-            
-            document.getElementById('resMonthlyMortgage').textContent = `NT$ ${estimatedMortgage.toLocaleString()}`;
-            document.getElementById('resTotalExpense').textContent = `NT$ ${Math.round(totalMonthlyDebt).toLocaleString()}`;
-            // 顯示加入年終與股利後的銀行認定月收入
-            document.getElementById('resTotalIncome').textContent = `NT$ ${Math.round(totalRecognizedIncome).toLocaleString()}`;
-            
-            const resDTIEl = document.getElementById('resDTI');
-            resDTIEl.textContent = `${dtiPercentage}%`;
-            if (dti > 0.6) {
-                resDTIEl.classList.remove('text-slate-800', 'text-green-600');
-                resDTIEl.classList.add('text-red-600');
-            } else if (dti < 0.45) {
-                resDTIEl.classList.remove('text-slate-800', 'text-red-600');
-                resDTIEl.classList.add('text-green-600');
+          });
+          var boxes = document.querySelectorAll('[data-device-box]');
+          boxes.forEach(function(box) {
+            var dev = box.getAttribute('data-device-box');
+            if (mode === 'all' || mode === dev) {
+              box.classList.remove('hidden');
             } else {
-                resDTIEl.classList.remove('text-red-600', 'text-green-600');
-                resDTIEl.classList.add('text-slate-800');
+              box.classList.add('hidden');
             }
+          });
+          showToast(mode === 'all' ? '顯示：雙機整合總覽' : (mode === 'hood' ? '顯示：DR7397 除油煙機' : '顯示：EG2351G IH感應爐'));
+        });
+      });
 
-            // 信用分數條動畫與顏色
-            document.getElementById('resScoreText').textContent = `${score} 分`;
-            const scoreBar = document.getElementById('resScoreBar');
-            // 計算百分比 (200-800)
-            let percentage = ((score - 200) / 600) * 100;
-            if(percentage < 0) percentage = 0;
-            if(percentage > 100) percentage = 100;
-            
-            // 設定顏色
-            scoreBar.classList.remove('bg-red-500', 'bg-yellow-400', 'bg-green-500');
-            if (score < 500) scoreBar.classList.add('bg-red-500');
-            else if (score < 600) scoreBar.classList.add('bg-yellow-400');
-            else scoreBar.classList.add('bg-green-500');
-            
-            setTimeout(() => {
-                scoreBar.style.width = `${percentage}%`;
-            }, 100);
+      // ==================== DR7397 RANGE HOOD SIMULATOR ====================
+      var hoodState = {
+        power: false,
+        mode: 'off', // 'off', 'ai', 'manual', 'deodorize', 'clean'
+        speedIndex: 0, // 0:M, 1:H, 2:T, 3:L
+        deodorizeMin: 0, // 20, 60, 999 (infinite)
+        light: false,
+        simTemp: 0
+      };
 
-            // 6. 處理動態卡片 (風險警示 & 新青安)
-            const warningCard = document.getElementById('warningCard');
-            const youthLoanCard = document.getElementById('youthLoanCard');
+      var speedSpecs = {
+        'OFF': { rpm: 0, flow: 0, watt: 0, label: '停止' },
+        'MICRO': { rpm: 550, flow: 4, watt: 15, label: '微速 (靜音除味)' },
+        'L': { rpm: 1400, flow: 10, watt: 70, label: '低速 L' },
+        'M': { rpm: 1700, flow: 12.5, watt: 120, label: '中速 M' },
+        'H': { rpm: 1950, flow: 15, watt: 190, label: '高速 H' },
+        'T': { rpm: 2150, flow: 16, watt: 230, label: 'Turbo 加速 (6分鐘後轉高速)' }
+      };
 
-            // 警示邏輯
-            if (grade === 'C' || grade === 'D') {
-                warningCard.classList.remove('hidden');
-                let reason = [];
-                if (score < 600) reason.push('聯徵信用評分低於 600 分');
-                if (dti > 0.60) reason.push('收支比 (DTI) 大於 60%');
-                document.getElementById('warningText').innerHTML = 
-                    `系統偵測到您的 <b>${reason.join(' 且 ')}</b>。<br>這在銀行授信政策中屬於高風險區間，極有可能被要求提供實力堅強之保證人，或直接遭婉拒核貸。建議先降低貸款金額、清償現有債務或培養信用後再行申請。`;
-            } else {
-                warningCard.classList.add('hidden');
-            }
+      function getHoodCurrentSpeedKey() {
+        if (hoodState.mode === 'off' || hoodState.mode === 'clean') return 'OFF';
+        if (hoodState.mode === 'deodorize') return 'MICRO';
+        if (hoodState.mode === 'manual') {
+          var order = ['M', 'H', 'T', 'L'];
+          return order[hoodState.speedIndex % 4];
+        }
+        if (hoodState.mode === 'ai') {
+          if (hoodState.simTemp >= 250) return 'T';
+          if (hoodState.simTemp >= 200) return 'H';
+          if (hoodState.simTemp >= 120) return 'M';
+          if (hoodState.simTemp > 0) return 'L';
+          return 'OFF';
+        }
+        return 'OFF';
+      }
 
-            // 新青安邏輯 (額度 <= 1000萬 且 財務健康 A或B)
-            if (loanAmount <= 10000000 && (grade === 'A' || grade === 'B')) {
-                youthLoanCard.classList.remove('hidden');
-            } else {
-                youthLoanCard.classList.add('hidden');
-            }
-            
-            // 自動滾動到結果區 (手機版體驗佳)
-            if(window.innerWidth < 1024) {
-                setTimeout(() => {
-                    resultState.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 150);
-            }
+      function renderHoodSimulator(guideTitle, guideDesc) {
+        var spKey = getHoodCurrentSpeedKey();
+        var spec = speedSpecs[spKey] || speedSpecs['OFF'];
+
+        // Baffle state
+        var baffleEl = document.getElementById('hood-baffle-badge');
+        var isBaffleOpen = (hoodState.mode === 'manual' || hoodState.mode === 'clean' || (hoodState.mode === 'ai' && hoodState.simTemp > 0));
+        baffleEl.textContent = isBaffleOpen ? '入風口：已下降展開' : '入風口：收回狀態';
+        baffleEl.className = isBaffleOpen
+          ? 'text-xs px-2.5 py-1 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/40 font-semibold'
+          : 'text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-medium';
+
+        // Screen Mode
+        var modeEl = document.getElementById('hood-screen-mode');
+        var centerIcon = document.getElementById('hood-center-icon');
+        var timerEl = document.getElementById('hood-screen-timer');
+
+        if (hoodState.mode === 'off') {
+          modeEl.textContent = '關機狀態';
+          centerIcon.textContent = '💤';
+          timerEl.textContent = '--';
+        } else if (hoodState.mode === 'ai') {
+          modeEl.textContent = hoodState.simTemp > 0 ? 'AI 智能風控運轉中' : '24H AI 待機偵測模式';
+          centerIcon.textContent = '🤖';
+          timerEl.textContent = hoodState.simTemp > 0 ? 'AI 自動調速' : '感測待機中';
+        } else if (hoodState.mode === 'manual') {
+          modeEl.textContent = '手動風控：' + spec.label;
+          centerIcon.textContent = '🌀';
+          timerEl.textContent = spKey === 'T' ? '06:00 倒數' : '持續運轉';
+        } else if (hoodState.mode === 'deodorize') {
+          modeEl.textContent = '手動靜音除味 (微速)';
+          centerIcon.textContent = '🍃';
+          timerEl.textContent = hoodState.deodorizeMin === 999 ? '∞ 無限循環' : (hoodState.deodorizeMin + ' 分鐘倒數');
+        } else if (hoodState.mode === 'clean') {
+          modeEl.textContent = '🔒 清潔鎖定模式 (其餘鍵鎖定)';
+          centerIcon.textContent = '🧽';
+          timerEl.textContent = '30分鐘自動解鎖';
+        }
+
+        // Light status
+        var lightEl = document.getElementById('hood-screen-light');
+        lightEl.textContent = hoodState.light ? '💡 LED照明開啟 (5W)' : '💡 照明關閉';
+        lightEl.className = hoodState.light ? 'text-amber-300 font-semibold' : 'text-slate-500';
+
+        // Speed pills
+        var pills = document.querySelectorAll('[data-speed-pill]');
+        pills.forEach(function(p) {
+          var k = p.getAttribute('data-speed-pill');
+          if (k === spKey) {
+            p.className = 'px-1.5 py-0.5 rounded bg-sky-500 text-white shadow';
+          } else {
+            p.className = 'px-1.5 py-0.5 rounded bg-slate-900 text-slate-600';
+          }
         });
 
-        // 7. 實作分享至 LINE 功能
-        function shareToLine() {
-            // 從畫面上取得最新計算出的結果
-            const grade = document.getElementById('resGrade').textContent;
-            const gradeDesc = document.getElementById('resGradeDesc').textContent;
-            const ltv = document.getElementById('resLTV').textContent;
-            const dti = document.getElementById('resDTI').textContent;
-            const monthlyMortgage = document.getElementById('resMonthlyMortgage').textContent;
-            
-            // 組裝分享文案
-            const shareText = `🏠 我的房貸審核預估結果出爐！\n\n🏦 預估評等：${grade}級 (${gradeDesc})\n💰 最高成數：${ltv}\n📊 收支比(DTI)：${dti}\n💸 預估月還款：${monthlyMortgage}\n\n這是一個超實用的房貸試算工具，你也來評估看看你的購屋戰力吧！`;
-            
-            // 使用 LINE Share URL Scheme
-            const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(shareText)}`;
-            
-            // 開啟新視窗/自動跳轉至 LINE App
-            window.open(lineUrl, '_blank');
+        document.getElementById('hood-rpm-info').textContent = spec.rpm + ' RPM ‧ ' + spec.flow + ' m³/min ‧ ' + spec.watt + 'W';
+
+        // Temperature display
+        var lTemp = document.getElementById('hood-left-temp');
+        var rTemp = document.getElementById('hood-right-temp');
+        var lAlert = document.getElementById('hood-left-alert');
+        var rAlert = document.getElementById('hood-right-alert');
+        var beepBadge = document.getElementById('hood-temp-beep-badge');
+
+        if (hoodState.mode === 'ai' && hoodState.simTemp > 0) {
+          lTemp.textContent = hoodState.simTemp + ' °C';
+          rTemp.textContent = hoodState.simTemp + ' °C';
+          if (hoodState.simTemp < 120) {
+            lTemp.className = 'text-lg font-bold led-font text-sky-300 mt-0.5';
+            rTemp.className = 'text-lg font-bold led-font text-sky-300 mt-0.5';
+            lAlert.textContent = '僅顯示溫度';
+            rAlert.textContent = '僅顯示溫度';
+            beepBadge.textContent = '低於120°C：僅顯示偵測溫度';
+          } else if (hoodState.simTemp < 200) {
+            lTemp.className = 'text-lg font-bold led-font text-emerald-400 mt-0.5';
+            rTemp.className = 'text-lg font-bold led-font text-emerald-400 mt-0.5';
+            lAlert.textContent = '料理溫度';
+            rAlert.textContent = '料理溫度';
+            beepBadge.textContent = '🔊 嗶嗶聲 2 次：「料理溫度」輪播';
+          } else if (hoodState.simTemp < 250) {
+            lTemp.className = 'text-lg font-bold led-font text-amber-400 mt-0.5';
+            rTemp.className = 'text-lg font-bold led-font text-amber-400 mt-0.5';
+            lAlert.textContent = '⚠️ 高溫提醒';
+            rAlert.textContent = '⚠️ 高溫提醒';
+            beepBadge.textContent = '🔊 嗶嗶聲 3 次：「高溫提醒」輪播';
+          } else {
+            lTemp.className = 'text-lg font-bold led-font text-rose-500 animate-blink mt-0.5';
+            rTemp.className = 'text-lg font-bold led-font text-rose-500 animate-blink mt-0.5';
+            lAlert.textContent = '🚨 高溫警示';
+            rAlert.textContent = '🚨 高溫警示';
+            beepBadge.textContent = '🔊 嗶嗶聲 5 次：「高溫警示」輪播';
+          }
+        } else {
+          lTemp.textContent = '-- °C';
+          rTemp.textContent = '-- °C';
+          lTemp.className = 'text-lg font-bold led-font text-slate-500 mt-0.5';
+          rTemp.className = 'text-lg font-bold led-font text-slate-500 mt-0.5';
+          lAlert.textContent = hoodState.mode === 'deodorize' ? 'AIR 靜音除味' : '無熱源';
+          rAlert.textContent = hoodState.mode === 'deodorize' ? '餘味排出中' : '無熱源';
         }
-    </script>
+
+        // Indicator dots
+        document.getElementById('ind-hood-power').className = (hoodState.mode !== 'off' && hoodState.mode !== 'clean') ? 'w-2 h-2 rounded-full bg-emerald-400 mt-1' : 'w-2 h-2 rounded-full bg-slate-700 mt-1';
+        document.getElementById('ind-hood-ai').className = (hoodState.mode === 'ai') ? 'w-2 h-2 rounded-full bg-sky-400 mt-1' : 'w-2 h-2 rounded-full bg-slate-700 mt-1';
+        document.getElementById('ind-hood-manual').className = (hoodState.mode === 'manual') ? 'w-2 h-2 rounded-full bg-sky-400 mt-1' : 'w-2 h-2 rounded-full bg-slate-700 mt-1';
+        document.getElementById('ind-hood-deodorize').className = (hoodState.mode === 'deodorize') ? 'w-2 h-2 rounded-full bg-emerald-400 mt-1' : 'w-2 h-2 rounded-full bg-slate-700 mt-1';
+        document.getElementById('ind-hood-light').className = hoodState.light ? 'w-2 h-2 rounded-full bg-amber-400 mt-1' : 'w-2 h-2 rounded-full bg-slate-700 mt-1';
+        document.getElementById('ind-hood-clean').className = (hoodState.mode === 'clean') ? 'w-2 h-2 rounded-full bg-rose-500 mt-1' : 'w-2 h-2 rounded-full bg-slate-700 mt-1';
+
+        if (guideTitle) document.getElementById('hood-guide-title').textContent = guideTitle;
+        if (guideDesc) document.getElementById('hood-guide-desc').textContent = guideDesc;
+      }
+
+      document.querySelectorAll('.hood-touch-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var key = btn.getAttribute('data-hood-btn');
+          if (hoodState.mode === 'clean' && key !== 'clean') {
+            renderHoodSimulator('清潔鎖定模式中，其餘按鍵無法使用', '在清潔鎖定模式下（入風口下降狀態），所有風速與照明鍵皆鎖定以策安全。請再次點擊「⑦ 清潔(3秒)」取消清潔模式並收回入風口。');
+            return;
+          }
+          if (key === 'power') {
+            if (hoodState.mode === 'off') {
+              hoodState.mode = 'ai';
+              hoodState.simTemp = 0;
+              renderHoodSimulator('已啟動 AI 模式（進入 24 小時 AI 待機偵測）', '電源鍵及 AI 鍵恆亮。當偵測到爐面溫度變化及正前方感測區（15–45cm）有人時，油煙機自動啟動並打開照明燈。可點擊下方「模擬 AI 爐面溫度」體驗！');
+            } else {
+              hoodState.mode = 'off';
+              hoodState.simTemp = 0;
+              renderHoodSimulator('已關閉除油煙機電源', '馬達停止運轉並收回入風口，電源燈熄滅進入關機狀態。');
+            }
+          } else if (key === 'ai') {
+            hoodState.mode = 'ai';
+            renderHoodSimulator('切換為 AI 智能風控模式', '系統持續偵測左右爐面溫度，自動調節低速(L)、中速(M)、高速(H)或 TURBO 風量，不需另外手動操作。');
+          } else if (key === 'manual') {
+            if (hoodState.mode !== 'manual') {
+              hoodState.mode = 'manual';
+              hoodState.speedIndex = 0; // Start at M
+            } else {
+              hoodState.speedIndex = (hoodState.speedIndex + 1) % 4;
+            }
+            renderHoodSimulator('手動風控模式（循環切換：中速 → 高速 → Turbo → 低速）', '入風口下降，預設馬達運轉中速(M)啟動；連續按壓可循環切換風量。Turbo 加速運轉維持 6 分鐘後會自動切換至高速(H)持續運轉。');
+          } else if (key === 'deodorize') {
+            if (hoodState.mode !== 'deodorize') {
+              hoodState.mode = 'deodorize';
+              hoodState.deodorizeMin = 20;
+            } else {
+              if (hoodState.deodorizeMin === 20) hoodState.deodorizeMin = 60;
+              else if (hoodState.deodorizeMin === 60) hoodState.deodorizeMin = 999;
+              else hoodState.deodorizeMin = 20;
+            }
+            renderHoodSimulator('手動靜音除味模式（20分鐘 → 60分鐘 → ∞無限循環）', '以微速（550 RPM / 15W 超省電靜音）排出廚房餘味。若選擇 20 或 60 分鐘，結束後入風口收回進入 AI 待機；若在 ∞ 無限循環下偵測到熱源，會自動切換至 AI 模式中速啟動！');
+          } else if (key === 'light') {
+            hoodState.light = !hoodState.light;
+            renderHoodSimulator(hoodState.light ? '已開啟 LED 照明燈 (5W)' : '已關閉 LED 照明燈', '照明鍵為獨立按鍵功能，不論電源開啟或關閉狀態下皆可按壓使用（清潔鎖定模式除外）。');
+          } else if (key === 'clean') {
+            if (hoodState.mode === 'clean') {
+              hoodState.mode = 'off';
+              renderHoodSimulator('已取消清潔鎖定模式（入風口收回）', '長按 3 秒清潔鍵已解除清潔鎖定，入風口自動收回並返回待機狀態。');
+            } else if (hoodState.mode === 'off') {
+              hoodState.mode = 'clean';
+              hoodState.light = false;
+              renderHoodSimulator('已啟動「清潔鎖定模式」（入風口下降）', '於關機狀態長按清潔鍵 3 秒，入風口下降至定位方便拆卸油杯與濾網架，鎖定指示燈亮起，其餘按鍵暫時鎖定。30 分鐘無動作將自動解鎖。');
+            } else {
+              renderHoodSimulator('請先按「① 電源鍵」關機，再啟動清潔模式', '依據說明書 P.06，清潔鎖定模式需在「電源鍵 ⏻ 關閉」狀態下長按 3 秒啟動；或於關機狀態下長按「③ 手動鍵 3 秒」進入藍牙配對。');
+            }
+          }
+        });
+      });
+
+      document.querySelectorAll('.sim-temp-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var val = btn.getAttribute('data-sim-temp');
+          if (val === 'off') {
+            hoodState.mode = 'deodorize';
+            hoodState.deodorizeMin = 20;
+            hoodState.simTemp = 0;
+            renderHoodSimulator('煮食結束關火：自動降速並進入 20 分鐘靜音除味 (P.08)', '關閉爐具後，油煙機隨溫度變化自動降速，再進入靜音除味（微速）模式將煮食後餘味排出；外圈藍色圓弧計時 20 分鐘（每 2 分鐘遞減一格），結束後入風口收回進入 AI 待機。');
+          } else {
+            hoodState.mode = 'ai';
+            hoodState.light = true;
+            hoodState.simTemp = parseInt(val, 10);
+            renderHoodSimulator('AI 偵測爐面溫度：' + val + '°C（自動調節風量與語音提醒）', 'AI 模式依偵測溫度自動切換風速，並透過螢幕字樣輪播與嗶聲提醒料理油溫（120-199°C 料理溫度嗶2聲、200-249°C 高溫提醒嗶3聲、250°C以上高溫警示嗶5聲）。');
+          }
+        });
+      });
+
+      // ==================== EG2351G IH COOKER SIMULATOR ====================
+      var ihWattMap = { 0: 0, 1: 600, 2: 1000, 3: 1400, 4: 1600, 5: 1800, 6: 2000, 7: 2200, 8: 2400, 9: 3000 };
+      var ihFryTemps = [60, 90, 120, 150, 180, 200, 220, 240];
+
+      var ihState = {
+        activeZone: 'left',
+        locked: false,
+        paused: false,
+        left: { on: false, mode: 'power', level: 0, fryIdx: 0, timerMin: 0, noPot: false, hot: false },
+        right: { on: false, mode: 'power', level: 0, fryIdx: 0, timerMin: 0, noPot: false, hot: false }
+      };
+
+      function getZoneWatt(z) {
+        if (!z.on || ihState.paused || z.noPot) return 0;
+        if (z.mode === 'soup') return 2400; // Level 8 before boiling
+        if (z.mode === 'fry') return 1600;
+        return ihWattMap[z.level] || 0;
+      }
+
+      function enforcePowerSharing(changedSide) {
+        var active = ihState[changedSide];
+        var otherSide = changedSide === 'left' ? 'right' : 'left';
+        var other = ihState[otherSide];
+        if (!other.on) return '';
+
+        // Rule from P.05: Boost (level 9) or Soup mode caps the other burner to level 1 (600W)
+        if ((active.mode === 'power' && active.level === 9) || active.mode === 'soup') {
+          if (other.mode === 'fry') {
+            other.mode = 'power';
+            other.level = 1;
+            return '（注意：啟動快炒或煲湯時，另一爐定溫功能關閉並限制為第 1 段 600W）';
+          }
+          if (other.level > 1 || other.mode === 'soup') {
+            other.mode = 'power';
+            other.level = 1;
+            return '（注意：受 3600W 總功率限制，另一爐自動調整為第 1 段 600W）';
+          }
+        }
+        // Total 3600W cap
+        var wActive = getZoneWatt(active);
+        var wOther = getZoneWatt(other);
+        if (wActive + wOther > 3600 && other.mode === 'power') {
+          while (other.level > 1 && (wActive + ihWattMap[other.level] > 3600)) {
+            other.level--;
+          }
+          return '（雙爐總功率自動調節於 3600W 安全上限內）';
+        }
+        return '';
+      }
+
+      function formatZoneSummary(z) {
+        if (!z.on) return z.hot ? 'OFF (♨餘熱)' : '關機';
+        if (ihState.paused) return '|| 暫停中';
+        if (z.noPot) return 'U 未置鍋';
+        if (z.mode === 'fry') return ihFryTemps[z.fryIdx] + '°C 定溫';
+        if (z.mode === 'soup') return '煲湯 0:15';
+        if (z.level === 9) return 'b 快炒 3000W';
+        if (z.level === 0) return '0 待機';
+        return z.level + '段 (' + ihWattMap[z.level] + 'W)';
+      }
+
+      function renderIHSimulator(title, desc) {
+        var z = ihState[ihState.activeZone];
+        var totalW = getZoneWatt(ihState.left) + getZoneWatt(ihState.right);
+
+        // Tabs
+        document.querySelectorAll('.ih-zone-tab').forEach(function(tab) {
+          var side = tab.getAttribute('data-ih-zone');
+          if (side === ihState.activeZone) {
+            tab.className = 'ih-zone-tab flex-1 py-2 px-3 rounded-lg text-xs font-bold bg-rose-600 text-white flex items-center justify-between shadow';
+          } else {
+            tab.className = 'ih-zone-tab flex-1 py-2 px-3 rounded-lg text-xs font-bold text-slate-400 hover:text-white flex items-center justify-between';
+          }
+        });
+
+        document.getElementById('ih-left-summary').textContent = formatZoneSummary(ihState.left);
+        document.getElementById('ih-right-summary').textContent = formatZoneSummary(ihState.right);
+
+        var totalBadge = document.getElementById('ih-total-watt-badge');
+        var amp = (totalW / 220).toFixed(1);
+        totalBadge.textContent = '總功率：' + totalW + 'W / 3600W (' + amp + 'A)';
+
+        // LED Display
+        var ledEl = document.getElementById('ih-led-display');
+        var wattEl = document.getElementById('ih-watt-display');
+        if (!z.on) {
+          ledEl.textContent = z.hot ? '♨' : 'OFF';
+          wattEl.textContent = z.hot ? '高溫警示 (>40°C 請勿觸摸)' : '0 W ‧ 關機狀態';
+        } else if (ihState.paused) {
+          ledEl.textContent = '||';
+          wattEl.textContent = '0 W ‧ 暫停功能 (最長10分鐘)';
+        } else if (z.noPot) {
+          ledEl.textContent = 'U';
+          wattEl.textContent = '0 W ‧ 未置鍋提醒 (超過1分鐘關機)';
+        } else if (z.mode === 'fry') {
+          ledEl.textContent = ihFryTemps[z.fryIdx] + '°C';
+          wattEl.textContent = getZoneWatt(z) + ' W ‧ 定溫油炸模式';
+        } else if (z.mode === 'soup') {
+          ledEl.textContent = '0:15';
+          wattEl.textContent = '2400 W ‧ 自動煲湯 (沸騰後轉1段)';
+        } else {
+          ledEl.textContent = z.level === 9 ? 'b' : String(z.level);
+          var timerText = z.timerMin > 0 ? (' ‧ 定時 ' + z.timerMin + '分') : '';
+          wattEl.textContent = getZoneWatt(z) + ' W' + timerText;
+        }
+
+        // Status badges
+        var lockBadge = document.getElementById('ih-badge-lock');
+        lockBadge.textContent = ihState.locked ? '🔒 兒童安全鎖定中' : '🔓 未鎖定';
+        lockBadge.className = ihState.locked ? 'px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 font-semibold' : 'px-1.5 py-0.5 rounded bg-slate-900 text-slate-500';
+
+        var pauseBadge = document.getElementById('ih-badge-pause');
+        pauseBadge.textContent = ihState.paused ? '⏸ 雙爐暫停中' : '▶ 正常運作';
+        pauseBadge.className = ihState.paused ? 'px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold' : 'px-1.5 py-0.5 rounded bg-slate-900 text-slate-500';
+
+        var hotBadge = document.getElementById('ih-badge-hot');
+        hotBadge.textContent = z.hot ? '♨ 爐面餘溫 >40°C' : '面板常溫';
+        hotBadge.className = z.hot ? 'px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300' : 'px-1.5 py-0.5 rounded bg-slate-900 text-slate-500';
+
+        var linkBadge = document.getElementById('ih-ai-link-badge');
+        var anyHeating = getZoneWatt(ihState.left) > 0 || getZoneWatt(ihState.right) > 0;
+        linkBadge.textContent = anyHeating ? '📡 AI連動：除油煙機同步運轉' : 'AI連動：待機';
+        linkBadge.className = anyHeating ? 'text-[10px] px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30 font-semibold' : 'text-[10px] px-1.5 py-0.5 rounded bg-slate-900 text-slate-500 border border-slate-800';
+
+        if (title) document.getElementById('ih-guide-title').textContent = title;
+        if (desc) document.getElementById('ih-guide-desc').textContent = desc;
+      }
+
+      document.querySelectorAll('.ih-zone-tab').forEach(function(tab) {
+        tab.addEventListener('click', function() {
+          ihState.activeZone = tab.getAttribute('data-ih-zone');
+          renderIHSimulator('已切換至' + (ihState.activeZone === 'left' ? '左爐' : '右爐') + '操作面板', '您可分別設定左右兩口爐的火力段數，體驗 3600W 雙爐智慧功率分配。');
+        });
+      });
+
+      document.querySelectorAll('.ih-touch-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var key = btn.getAttribute('data-ih-btn');
+          var z = ihState[ihState.activeZone];
+
+          if (key === 'lock') {
+            ihState.locked = !ihState.locked;
+            renderIHSimulator(
+              ihState.locked ? '🔒 已啟動兒童安全鎖（按住1秒）' : '🔓 已解除兒童安全鎖（按住1秒）',
+              ihState.locked ? '鎖定時除了「電源鍵關機」與「解鎖」外，其它按鍵皆被鎖定無法操作，防止兒童誤觸。' : '鎖定指示燈熄滅，恢復正常按鍵操作。'
+            );
+            return;
+          }
+
+          if (ihState.locked && key !== 'power') {
+            renderIHSimulator('🔒 兒童安全鎖定中，無法操作此按鍵', '目前處於兒童安全鎖狀態，僅能按「電源鍵」關機，或再次點擊「🔒 兒童安全鎖」解鎖。');
+            return;
+          }
+
+          if (key === 'power') {
+            if (z.on) {
+              z.on = false;
+              z.hot = z.level > 0 || z.mode !== 'power';
+              z.level = 0;
+              z.mode = 'power';
+              z.timerMin = 0;
+              z.noPot = false;
+              if (!ihState.left.on && !ihState.right.on) ihState.paused = false;
+              renderIHSimulator('已關閉此爐電源（顯示 ♨ 高溫餘熱警示）', '關機後若加熱區溫度高於 40°C，LED 會顯示「♨」高溫警示燈提醒請勿觸摸；待降至 40°C 以下自動熄滅。');
+            } else {
+              z.on = true;
+              z.mode = 'power';
+              z.level = 0;
+              z.noPot = false;
+              renderIHSimulator('已開機進入待機狀態（螢幕顯示 0）', '在加熱區放置好適用鍋具，按住電源鍵約 1 秒開機顯示「0」。若火力段數為 0 超過 1 分鐘未操作，機器會自動關機。');
+            }
+            return;
+          }
+
+          if (!z.on) {
+            renderIHSimulator('請先點擊「⏻ 電源開關」開機', 'IH 感應爐目前為關機狀態，請先開啟電源再調整火力或功能。');
+            return;
+          }
+
+          if (key === 'pause') {
+            ihState.paused = !ihState.paused;
+            renderIHSimulator(
+              ihState.paused ? '⏸ 已啟動暫停功能（左右爐顯示 ||）' : '▶ 已取消暫停，恢復原設定火力',
+              '加熱時按「||」鍵啟動暫停，加熱與定時皆暫時停止。暫停最長僅能維持 10 分鐘，超過 10 分鐘未解除將自動關機。'
+            );
+            return;
+          }
+
+          if (ihState.paused) {
+            renderIHSimulator('⏸ 暫停模式中，請先按「|| 暫停鍵」恢復運作', '暫停期間除暫停鍵及開關機鍵外，其餘按鍵皆被鎖定。');
+            return;
+          }
+
+          if (key === 'potremove') {
+            z.noPot = !z.noPot;
+            renderIHSimulator(
+              z.noPot ? '🍳 模擬移開鍋具：閃爍「U」並每1秒短音提示' : '🍳 已放回鍋具：自動恢復加熱運作',
+              '有火力狀態下離鍋後，螢幕會顯示「U」且每 1 秒叫一短音提示，直到放回鍋具後繼續運作；若離鍋超過 1 分鐘則自動關機。'
+            );
+            return;
+          }
+
+          if (key === 'plus') {
+            if (z.mode === 'fry') {
+              z.fryIdx = Math.min(7, z.fryIdx + 1);
+              renderIHSimulator('定溫油炸溫度調升至 ' + ihFryTemps[z.fryIdx] + '°C', '定溫段數共八段：60、90、120、150、180、200、220、240°C。');
+            } else {
+              z.mode = 'power';
+              z.level = z.level === 0 ? 1 : Math.min(8, z.level + 1);
+              var note = enforcePowerSharing(ihState.activeZone);
+              renderIHSimulator('火力設定為第 ' + z.level + ' 段（' + ihWattMap[z.level] + 'W）' + note, '待機模式下按「+」鍵螢幕顯示第 1 段火力（600W），最高可調至第 8 段（2400W）。');
+            }
+          } else if (key === 'minus') {
+            if (z.mode === 'fry') {
+              z.fryIdx = Math.max(0, z.fryIdx - 1);
+              renderIHSimulator('定溫油炸溫度調降至 ' + ihFryTemps[z.fryIdx] + '°C', '定溫段數共八段：60、90、120、150、180、200、220、240°C。');
+            } else {
+              z.mode = 'power';
+              z.level = z.level === 0 ? 4 : Math.max(1, z.level - 1);
+              var noteM = enforcePowerSharing(ihState.activeZone);
+              renderIHSimulator('火力設定為第 ' + z.level + ' 段（' + ihWattMap[z.level] + 'W）' + noteM, '待機模式下按「-」鍵螢幕直接顯示第 4 段火力（1600W）；在快炒 b 模式下按「-」鍵則切換至第 8 段。');
+            }
+          } else if (key === 'boost') {
+            z.mode = 'power';
+            z.level = z.level === 9 ? 8 : 9;
+            var noteB = enforcePowerSharing(ihState.activeZone);
+            renderIHSimulator(
+              z.level === 9 ? ('⚡ 啟動快炒功能 b（3000W 超大火力）' + noteB) : '已結束快炒，恢復第 8 段火力',
+              '快炒功能以 3000W 加熱最長 10 分鐘，時間結束或再次按快炒鍵即回復原本設定火力段。啟動快炒時，另一爐受功率限制僅能使用第 1 段（600W）。'
+            );
+          } else if (key === 'fry') {
+            z.mode = 'fry';
+            z.fryIdx = 0; // Default 60C
+            renderIHSimulator('🌡️ 啟動定溫油炸功能（預設 60°C）', '可按「+」或「-」調整 60°C～240°C 共八段油溫。油量應達 0.5L 以上，不建議使用複合底鍋具。');
+          } else if (key === 'soup') {
+            z.mode = 'soup';
+            z.timerMin = 15;
+            var noteS = enforcePowerSharing(ihState.activeZone);
+            renderIHSimulator('🍲 啟動自動煲湯功能（火力 8 段，預設 0:15）' + noteS, '沸騰後火力會自動下降到第 1 段並開始倒數，結束時切斷火力顯示 End。使用此功能時另一爐僅能使用第 1 段火力（水量建議 0.5L 以上並蓋上鍋蓋）。');
+          } else if (key === 'timer') {
+            if (z.level === 0 && z.mode === 'power') {
+              z.level = 4;
+            }
+            z.timerMin = z.timerMin === 0 ? 15 : (z.timerMin === 15 ? 30 : (z.timerMin === 30 ? 60 : 0));
+            renderIHSimulator(
+              z.timerMin > 0 ? ('🕒 定時功能已設定：' + z.timerMin + ' 分鐘') : '🕒 已解除定時功能（長按定時鍵1秒）',
+              '在已設置好的火力段數下按定時鍵，預設 15 分鐘（0:15），可按 +/- 設定 1 分鐘～8 小時。倒數結束自動切斷火力並顯示 End。'
+            );
+          }
+        });
+      });
+
+      // Reset Both Simulators
+      document.getElementById('btn-reset-simulators').addEventListener('click', function() {
+        hoodState = { power: false, mode: 'off', speedIndex: 0, deodorizeMin: 0, light: false, simTemp: 0 };
+        ihState = {
+          activeZone: 'left', locked: false, paused: false,
+          left: { on: false, mode: 'power', level: 0, fryIdx: 0, timerMin: 0, noPot: false, hot: false },
+          right: { on: false, mode: 'power', level: 0, fryIdx: 0, timerMin: 0, noPot: false, hot: false }
+        };
+        renderHoodSimulator('已重置除油煙機面板', '點擊任一按鍵開始模擬操作。');
+        renderIHSimulator('已重置 IH 感應爐面板', '點擊任一按鍵開始模擬操作。');
+        showToast('已重置雙機模擬面板');
+      });
+
+      // ==================== TAB 2: PAIRING TIMER & COOKWARE CHECKER ====================
+      var pairingInterval = null;
+      var pairingRemaining = 150;
+      document.getElementById('btn-start-pairing-timer').addEventListener('click', function() {
+        var box = document.getElementById('pairing-timer-box');
+        var disp = document.getElementById('pairing-timer-display');
+        if (pairingInterval) {
+          clearInterval(pairingInterval);
+          pairingInterval = null;
+          box.classList.add('hidden');
+          document.getElementById('btn-start-pairing-timer').textContent = '⏱️ 啟動 150秒配對計時';
+          return;
+        }
+        pairingRemaining = 150;
+        box.classList.remove('hidden');
+        disp.textContent = pairingRemaining + 's';
+        document.getElementById('btn-start-pairing-timer').textContent = '⏹ 停止計時';
+        pairingInterval = setInterval(function() {
+          pairingRemaining--;
+          disp.textContent = pairingRemaining + 's';
+          if (pairingRemaining <= 0) {
+            clearInterval(pairingInterval);
+            pairingInterval = null;
+            disp.textContent = '時間到';
+            document.getElementById('btn-start-pairing-timer').textContent = '⏱️ 重新啟動 150秒計時';
+          }
+        }, 1000);
+      });
+
+      function evaluateCookware() {
+        var mat = document.getElementById('select-pot-material').value;
+        var size = document.getElementById('select-pot-size').value;
+        var base = document.getElementById('select-pot-base').value;
+
+        var card = document.getElementById('pot-check-result');
+        var title = document.getElementById('pot-grade-title');
+        var bars = document.getElementById('pot-bars-visual');
+        var desc = document.getElementById('pot-grade-desc');
+        var pills = document.getElementById('pot-mode-pills');
+
+        if (mat === 'non_mag' || size === 'small' || base !== 'flat') {
+          card.className = 'p-3.5 rounded-xl bg-slate-950 border border-rose-500/50 space-y-2';
+          title.className = 'text-sm font-bold text-rose-400';
+          title.textContent = '❌ 鍋具效率：不可使用（燈條顯示 2 格或 U）';
+          bars.className = 'font-mono text-xs text-rose-400 bg-rose-950/60 px-2 py-1 rounded border border-rose-700/50';
+          bars.textContent = '■■□□□□□□ 2/8格';
+          var reasons = [];
+          if (mat === 'non_mag') reasons.push('非導磁性材質（純鋁/銅/玻璃/陶瓷）無法感應');
+          if (size === 'small') reasons.push('鍋底導磁區直徑小於 120mm 無法感應');
+          if (base === 'thin') reasons.push('鍋底厚度小於 1mm 易變形且產生異音');
+          if (base === 'curved') reasons.push('底部凹凸過大、弧形或有腳座影響乾燒偵測與感應');
+          desc.textContent = '原因：' + reasons.join('；') + '。請勿使用導熱板間接加熱！';
+          pills.innerHTML = '<span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">❌ 煎炒料理</span>' +
+                            '<span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">❌ 自動煲湯</span>' +
+                            '<span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">❌ 定溫油炸</span>';
+          return;
+        }
+
+        if ((mat === 'clad_ss' || mat === 'clad_al') && size === 'mid') {
+          card.className = 'p-3.5 rounded-xl bg-slate-950 border border-rose-500/50 space-y-2';
+          title.className = 'text-sm font-bold text-rose-400';
+          title.textContent = '⚠️ 導磁面積不足（易出現 U 停機）';
+          bars.className = 'font-mono text-xs text-rose-400 bg-rose-950/60 px-2 py-1 rounded border border-rose-700/50';
+          bars.textContent = '■■□□□□□□ 2/8格';
+          desc.textContent = '依據說明書 P.08：若鍋底參雜其他材質（複合底），鍋底導磁區直徑最少須為 150mm 以上，否則易感應面積不足而停機。';
+          pills.innerHTML = '<span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">⚠️ 需改用 ≥150mm 鍋具</span>';
+          return;
+        }
+
+        if (mat === 'clad_ss' || mat === 'clad_al') {
+          card.className = 'p-3.5 rounded-xl bg-slate-950 border border-amber-500/40 space-y-2';
+          title.className = 'text-sm font-bold text-amber-300';
+          title.textContent = '⚠️ 鍋具效率：尚可（燈條顯示 4～6 格）';
+          bars.className = 'font-mono text-xs text-amber-300 bg-amber-950/60 px-2 py-1 rounded border border-amber-700/50';
+          bars.textContent = '■■■■■■□□ 6/8格';
+          desc.textContent = '複合底鍋具（如不沾鍋、鋁+導磁底）僅適合一般煎炒料理；因導熱與測溫特性差異，不建議使用「定溫油炸」與「自動煲湯」功能。' + (size === 'oversize' ? '（注意：EG2501G/EG9500G 無法同時擺放2個240mm以上鍋具）' : '');
+          pills.innerHTML = '<span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">⭕ 煎炒料理</span>' +
+                            '<span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">❌ 自動煲湯 (不建議)</span>' +
+                            '<span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">❌ 定溫油炸 (不建議)</span>';
+          return;
+        }
+
+        // Iron / Cast Iron / Magnetic Stainless Steel
+        card.className = 'p-3.5 rounded-xl bg-slate-950 border border-emerald-500/40 space-y-2';
+        title.className = 'text-sm font-bold text-emerald-400';
+        title.textContent = '✅ 鍋具效率：優（燈條顯示 8 格）';
+        bars.className = 'font-mono text-xs text-emerald-400 bg-emerald-950/60 px-2 py-1 rounded border border-emerald-700/50';
+        bars.textContent = '■■■■■■■■ 8/8格';
+        desc.textContent = '鐵鍋、鑄鐵鍋、單層導磁不鏽鋼鍋加熱效率最高，且噪音最小！完整支援所有烹調模式。' + (size === 'oversize' ? '（注意：EG2501G/EG9500G 無法同時擺放2個240mm以上鍋具）' : '');
+        pills.innerHTML = '<span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">⭕ 煎炒料理</span>' +
+                          '<span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">⭕ 自動煲湯</span>' +
+                          '<span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">⭕ 定溫油炸</span>';
+      }
+
+      ['select-pot-material', 'select-pot-size', 'select-pot-base'].forEach(function(id) {
+        document.getElementById(id).addEventListener('change', evaluateCookware);
+      });
+
+      // ==================== TAB 3: ERROR CODE DATA ====================
+      var errorData = {
+        'E1E2': {
+          code: '代碼 E1 或 E2：供電電壓異常',
+          tag: '電力檢查',
+          cause: '供電電壓過低或過高（本機額定電壓為 220V / 60Hz）。',
+          fix: '請先確認家中 220V 供電是否正常；若供電正常爐具卻無法正常動作，請與櫻花客服中心聯絡（0800-021-818）。'
+        },
+        'E3': {
+          code: '代碼 E3：空鍋乾燒或爐面溫度過高',
+          tag: '溫度保護',
+          cause: '空鍋乾燒造成爐面溫度過高，或被加熱物體溫升過高（爐具工作一段時間後停機）。',
+          fix: '請立即拿開空鍋或被加熱物體，待爐具加熱區表面冷卻後，即可繼續啟動使用。'
+        },
+        'E4': {
+          code: '代碼 E4：爐具使用環境溫度過高',
+          tag: '通風散熱',
+          cause: '爐具使用環境溫度過高，底部進氣或出氣散熱不良，或週圍有發熱器具。',
+          fix: '請檢查爐具週圍是否有發熱器具、廚櫃底部進氣/出氣口是否被堵塞，改善環境通風條件後再使用。'
+        },
+        'E5': {
+          code: '代碼 E5：鍋具不適用或過熱保護偵測異常',
+          tag: '鍋具/感測',
+          cause: '1. 使用了不適合之鍋具（參閱說明書 P.8）。 2. 爐具面板過熱保護偵測裝置故障。',
+          fix: '請先更換為適合之平底導磁鍋具；若更換後仍顯示 E5，請與客服中心聯絡（0800-021-818）。'
+        },
+        'E6': {
+          code: '代碼 E6：過熱保護偵測裝置故障',
+          tag: '專人檢修',
+          cause: '內部過熱保護偵測裝置故障，爐具停機不工作。',
+          fix: '請關閉電源並直接與櫻花客服中心聯絡（0800-021-818）安排技師檢修。'
+        },
+        'E7': {
+          code: '代碼 E7：操作面板異物或湯汁覆蓋',
+          tag: '面板清潔',
+          cause: '湯汁溢出到操作面板，或有抹布、異物覆蓋到觸控操作面板。',
+          fix: '1. 請清潔、去除操作面板上的湯汁或異物。 2. 若清潔後仍未排除，請與客服中心聯絡。'
+        },
+        'U': {
+          code: '閃爍「U」且蜂鳴約 1 分鐘後停機',
+          tag: '鍋具感應',
+          cause: '1. 移開鍋具或使用了不適合的鍋具。 2. 鍋具底部非整面都是導磁材質（複合底），導致感應面積不足。',
+          fix: '1. 請將適用鍋具置中放回加熱區。 2. 若為複合底鍋具，請改用鍋底直徑 15cm (150mm) 以上之平底鍋具。'
+        },
+        'HOT': {
+          code: '顯示「♨」高溫警示符號',
+          tag: '安全提醒',
+          cause: '爐具剛使用完畢，微晶玻璃面板加熱區域餘溫仍高於 40°C（非故障）。',
+          fix: '此為防燙安全提醒，請勿用手觸摸面板，亦勿立即清潔或使用煲湯/定溫功能。當溫度降至 40°C 以下時指示燈會自動熄滅。'
+        },
+        'FAN': {
+          code: '關閉電源後，內部風扇仍持續運轉',
+          tag: '正常散熱',
+          cause: '電子系統高溫冷卻中（正常現象，非故障）。',
+          fix: '風扇會於電子系統高溫時自動啟動，並於停止加熱後持續運轉一段時間幫助散熱，待降溫後會自動停止，請勿直接拔除總電源。'
+        }
+      };
+
+      document.querySelectorAll('.err-code-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var code = btn.getAttribute('data-err-code');
+          var info = errorData[code];
+          if (!info) return;
+          document.querySelectorAll('.err-code-btn').forEach(function(b) {
+            if (b === btn) {
+              b.className = 'err-code-btn py-2 px-1 rounded-xl bg-rose-600 text-white font-mono text-xs font-bold border border-rose-400 shadow';
+            } else {
+              b.className = 'err-code-btn py-2 px-1 rounded-xl bg-slate-950 hover:bg-slate-800 text-rose-400 font-mono text-xs font-bold border border-slate-800';
+            }
+          });
+          document.getElementById('err-card-code').textContent = info.code;
+          document.getElementById('err-card-tag').textContent = info.tag;
+          document.getElementById('err-card-cause').textContent = info.cause;
+          document.getElementById('err-card-fix').textContent = info.fix;
+        });
+      });
+
+      // ==================== TAB 4: MAINTENANCE TRACKER & WARRANTY (LOCALSTORAGE) ====================
+      var defaultCareTasks = [
+        { id: 'daily_glass', title: '每次煮食後：玻璃面板與吸入口周圍擦拭', cycle: '建議每次煮食後', device: '雙機', lastDone: '尚未打卡' },
+        { id: 'monthly_cup', title: '每月定期：集油杯及濾網架取出倒油清洗', cycle: '建議每月 1 次', device: 'DR7397', lastDone: '尚未打卡' },
+        { id: 'quarter_deep', title: '每季定期：機體外殼與玻璃表面深度清理', cycle: '建議每 3 個月', device: 'DR7397', lastDone: '尚未打卡' },
+        { id: 'filter_replace', title: '定期更換：拆下髒污油網更換新油網 (缺口在左右)', cycle: '建議至少每 4 個月', device: 'DR7397', lastDone: '尚未打卡' }
+      ];
+
+      function loadCareTasks() {
+        try {
+          var raw = localStorage.getItem('sakura_care_tasks_v1');
+          if (raw) return JSON.parse(raw);
+        } catch (e) {}
+        return JSON.parse(JSON.stringify(defaultCareTasks));
+      }
+
+      function saveCareTasks(list) {
+        try {
+          localStorage.setItem('sakura_care_tasks_v1', JSON.stringify(list));
+        } catch (e) {}
+      }
+
+      var careTasks = loadCareTasks();
+
+      function renderCareTasks() {
+        var container = document.getElementById('care-tracker-list');
+        container.innerHTML = '';
+        careTasks.forEach(function(task, idx) {
+          var row = document.createElement('div');
+          row.className = 'p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between gap-2';
+          row.innerHTML =
+            '<div>' +
+              '<div class="font-bold text-white">' + task.title + '</div>' +
+              '<div class="text-[11px] text-slate-400 mt-0.5">' + task.cycle + ' ‧ 上次紀錄：<span class="text-emerald-400 font-medium">' + task.lastDone + '</span></div>' +
+            '</div>' +
+            '<button type="button" data-care-idx="' + idx + '" class="px-3 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 font-semibold transition shrink-0">✓ 完成打卡</button>';
+          container.appendChild(row);
+        });
+
+        container.querySelectorAll('[data-care-idx]').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            var i = parseInt(btn.getAttribute('data-care-idx'), 10);
+            var today = new Date().toISOString().slice(0, 10);
+            careTasks[i].lastDone = today;
+            saveCareTasks(careTasks);
+            renderCareTasks();
+            showToast('已記錄保養日期：' + today);
+          });
+        });
+      }
+
+      document.getElementById('btn-reset-care-log').addEventListener('click', function() {
+        careTasks = JSON.parse(JSON.stringify(defaultCareTasks));
+        saveCareTasks(careTasks);
+        renderCareTasks();
+        showToast('已清除保養打卡紀錄');
+      });
+
+      // Warranty Memo
+      function loadWarranty() {
+        try {
+          var raw = localStorage.getItem('sakura_warranty_v1');
+          if (raw) {
+            var data = JSON.parse(raw);
+            if (data.date) document.getElementById('warranty-date').value = data.date;
+            if (data.hood) document.getElementById('warranty-hood-sn').value = data.hood;
+            if (data.ih) document.getElementById('warranty-ih-sn').value = data.ih;
+          }
+        } catch (e) {}
+      }
+
+      document.getElementById('btn-save-warranty').addEventListener('click', function() {
+        var data = {
+          date: document.getElementById('warranty-date').value,
+          hood: document.getElementById('warranty-hood-sn').value,
+          ih: document.getElementById('warranty-ih-sn').value
+        };
+        try {
+          localStorage.setItem('sakura_warranty_v1', JSON.stringify(data));
+          showToast('💾 已儲存保固資訊至手機瀏覽器');
+        } catch (e) {
+          showToast('儲存完成');
+        }
+      });
+
+      // ==================== TAB 5: DUCT LENGTH CALCULATOR ====================
+      function updateDuctCalc() {
+        var st = parseFloat(document.getElementById('duct-straight').value) || 0;
+        var e90 = parseInt(document.getElementById('duct-elbow90').value, 10) || 0;
+        var e45 = parseInt(document.getElementById('duct-elbow45').value, 10) || 0;
+        var total = st + (e90 * 3) + (e45 * 2);
+
+        var totalEl = document.getElementById('duct-total-m');
+        var badgeEl = document.getElementById('duct-status-badge');
+        var boxEl = document.getElementById('duct-calc-result');
+
+        totalEl.textContent = total.toFixed(1) + ' 米';
+        if (total <= 10) {
+          boxEl.className = 'p-3 rounded-xl bg-slate-950 border border-emerald-500/40 flex items-center justify-between text-xs';
+          totalEl.className = 'text-emerald-400 font-mono text-sm';
+          badgeEl.className = 'px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-semibold';
+          badgeEl.textContent = '✅ 符合 10 米內標準';
+        } else {
+          boxEl.className = 'p-3 rounded-xl bg-slate-950 border border-rose-500/50 flex items-center justify-between text-xs';
+          totalEl.className = 'text-rose-400 font-mono text-sm';
+          badgeEl.className = 'px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 font-semibold';
+          badgeEl.textContent = '⚠️ 超過 10 米！請加裝手動中繼風機';
+        }
+      }
+
+      ['duct-straight', 'duct-elbow90', 'duct-elbow45'].forEach(function(id) {
+        document.getElementById(id).addEventListener('input', updateDuctCalc);
+      });
+
+      // ==================== SEARCH MODAL & FULL MANUAL INDEX ====================
+      var manualSearchDB = [
+        { title: 'IH連動配對設定 (藍牙5.0)', tab: 'tab-smart', text: '除油煙機關機下長按手動鍵3秒 -> 按AI鍵 -> IH爐待機下長按油煙機連動鍵3秒完成配對 (EG9500G無此功能)。' },
+        { title: '初次送電開機「爐頭定位」與重置', tab: 'tab-smart', text: '爐面冷卻下：搭配IH爐長按AI鍵3秒；搭配瓦斯爐開機無置鍋將AB兩側爐火開至最大火。待機長按AI鍵3秒再按手動鍵可重置。' },
+        { title: '料理溫度提醒與嗶聲次數 (120/200/250°C)', tab: 'tab-panel', text: '低於120°C僅顯示溫度；120-199°C嗶2聲顯示料理溫度；200-249°C嗶3聲顯示高溫提醒；250°C以上嗶5聲顯示高溫警示。' },
+        { title: '清潔鎖定模式與濾網油網更換', tab: 'tab-care', text: '電源關閉時長按清潔鍵3秒，入風口下降並鎖定按鍵，雙手往前取下油杯與兩片濾網架。油網缺口在左右兩側，建議至少4個月更換一次。' },
+        { title: '手動靜音除味 (20分/60分/∞無限循環)', tab: 'tab-panel', text: '微速550RPM/15W排出餘味。無限循環∞下若偵測熱源會自動切換至AI模式中速啟動。' },
+        { title: 'IH爐 快炒功能 b (3000W) 與功率限制', tab: 'tab-panel', text: '快炒最長10分鐘，功率3000W。啟動快炒或煲湯時，另一爐受3600W限制僅能使用第1段(600W)。' },
+        { title: 'IH爐 定溫油炸功能 (60°C～240°C)', tab: 'tab-panel', text: '共八段溫度(60/90/120/150/180/200/220/240°C)，油量須達0.5L以上，不建議使用複合底鍋具。' },
+        { title: 'IH爐 自動煲湯與定時功能 (1分～8小時)', tab: 'tab-panel', text: '煲湯預設火力8段、15分鐘(0:15)，沸騰後自動降為第1段並開始倒數，結束顯示End。' },
+        { title: 'IH爐 鍋具效率偵測 (2格/4-6格/8格)', tab: 'tab-smart', text: '待機下鍋具加水置中，按鍋具效率偵測鍵：8格為優(鐵/鑄鐵/不鏽鋼)，4-6格尚可(複合底)，2格不可使用。鍋底直徑至少120mm(複合底150mm)。' },
+        { title: 'IH爐 故障代碼 E1 / E2 / E3 / E4 / E5 / E6 / E7 / U', tab: 'tab-trouble', text: 'E1/E2電壓異常、E3空鍋乾燒過高溫、E4環境溫度過高、E5鍋具不合或過熱偵測故障、E6過熱保護故障、E7面板湯汁異物覆蓋、U未置鍋。' },
+        { title: '除油煙機安裝高度與排煙管規範', tab: 'tab-specs', text: '爐面至機體前緣距離65-70cm。排煙管上限10米(90度彎頭算3米、45度算2米)，牆孔Ø150mm，防風帽有效出口面積≥65%。' },
+        { title: 'IH爐 流理檯挖孔尺寸與電力規格', tab: 'tab-specs', text: '220V/60Hz、3600W/16.4A、T型插頭2.0mm²。挖孔：EG2351G為680x410mm；EG2501G/9500G為516x480mm；EG2351XM為728x468mm R113。勿用矽利康封膠。' },
+        { title: 'SAKURA iCare 永久免費油網送到家與客服', tab: 'tab-care', text: '免費客服專線 0800-021-818，登錄享永久免費油網送到家、免費廚房健檢、熱水器安檢、淨水器健檢、空間健檢。' }
+      ];
+
+      function renderSearchResults(q) {
+        var container = document.getElementById('search-results');
+        container.innerHTML = '';
+        var kw = (q || '').trim().toLowerCase();
+        var matches = manualSearchDB.filter(function(item) {
+          if (!kw) return true;
+          return item.title.toLowerCase().indexOf(kw) !== -1 || item.text.toLowerCase().indexOf(kw) !== -1;
+        });
+
+        if (matches.length === 0) {
+          container.innerHTML = '<div class="text-slate-500 text-center py-4">找不到相符的說明書條目，請嘗試其他關鍵字</div>';
+          return;
+        }
+
+        matches.forEach(function(item) {
+          var div = document.createElement('div');
+          div.className = 'p-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 cursor-pointer transition';
+          div.innerHTML =
+            '<div class="font-bold text-rose-300">' + item.title + '</div>' +
+            '<p class="text-slate-400 mt-0.5 leading-relaxed">' + item.text + '</p>';
+          div.addEventListener('click', function() {
+            document.getElementById('modal-search').classList.add('hidden');
+            switchTab(item.tab);
+          });
+          container.appendChild(div);
+        });
+      }
+
+      document.getElementById('btn-open-search').addEventListener('click', function() {
+        document.getElementById('modal-search').classList.remove('hidden');
+        renderSearchResults(document.getElementById('search-input').value);
+        document.getElementById('search-input').focus();
+      });
+
+      document.getElementById('btn-close-search').addEventListener('click', function() {
+        document.getElementById('modal-search').classList.add('hidden');
+      });
+
+      document.getElementById('search-input').addEventListener('input', function(e) {
+        renderSearchResults(e.target.value);
+      });
+
+      // Install Modal
+      document.getElementById('btn-open-install').addEventListener('click', function() {
+        document.getElementById('modal-install').classList.remove('hidden');
+      });
+      document.getElementById('btn-close-install').addEventListener('click', function() {
+        document.getElementById('modal-install').classList.add('hidden');
+      });
+      document.getElementById('btn-ok-install').addEventListener('click', function() {
+        document.getElementById('modal-install').classList.add('hidden');
+      });
+
+      document.getElementById('btn-copy-hotline').addEventListener('click', function() {
+        var phone = '0800-021-818';
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(phone).then(function() {
+            showToast('已複製客服專線：' + phone);
+          }).catch(function() {
+            fallbackCopy(phone);
+          });
+        } else {
+          fallbackCopy(phone);
+        }
+      });
+
+      function fallbackCopy(text) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand('copy');
+          showToast('已複製客服專線：' + text);
+        } catch (e) {}
+        document.body.removeChild(ta);
+      }
+
+      // Initialize App State
+      renderHoodSimulator();
+      renderIHSimulator();
+      evaluateCookware();
+      renderCareTasks();
+      loadWarranty();
+      updateDuctCalc();
+    })();
+  </script>
 </body>
 </html>
-
-
